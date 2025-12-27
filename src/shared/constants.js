@@ -18,5 +18,11 @@ export const DEFAULT_TOGGLES = [
     label: "Advertentieblokken wegfilteren",
     description: "",
     enabled: true
+  },
+  {
+    id: "filter-verkoop-door-bol",
+    label: "Verkoop door Bol",
+    description: "",
+    enabled: false
   }
 ];

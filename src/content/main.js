@@ -6,6 +6,7 @@ import { DEFAULT_TOGGLES, EXTENSION_NAME } from "../shared/constants.js";
 import { createMerkloosFilter } from "./filters/merkloosFilter.js";
 import { createGesponsordFilter } from "./filters/gesponsordFilter.js";
 import { createGeneralAdsFilter } from "./filters/generalAdsFilter.js";
+import { createVerkoopDoorBolFilter } from "./filters/verkoopDoorBolFilter.js";
 
 const ROOT_ID = "bol-filter-root";
 let initialized = false;
@@ -29,7 +30,8 @@ function init() {
   const filters = {
     "filter-merkloos": createMerkloosFilter(),
     "filter-gesponsord": createGesponsordFilter(),
-    "filter-general-ads": createGeneralAdsFilter()
+    "filter-general-ads": createGeneralAdsFilter(),
+    "filter-verkoop-door-bol": createVerkoopDoorBolFilter()
   };
 
   const setCollapsed = (isCollapsed) => {
