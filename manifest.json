@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "Bol Filter",
+  "version": "0.1.0",
+  "description": "Filter junk and dropshipper listings on bol.com with a collapsible control panel.",
+  "browser_action": {
+    "default_title": "Bol Filter"
+  },
+  "background": {
+    "scripts": ["src/background/index.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "https://www.bol.com/*",
+    "http://www.bol.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.bol.com/*"
+      ],
+      "js": [
+        "src/content/loader.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    "src/content/main.js",
+    "src/content/ui/*",
+    "src/content/state/*",
+    "src/content/utils/*",
+    "src/content/styles/*"
+  ]
+}
