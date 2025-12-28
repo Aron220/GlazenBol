@@ -1,7 +1,7 @@
 import { createElement } from "../utils/dom.js";
 import { EXTENSION_NAME } from "../../shared/constants.js";
 
-export function createPanel({ store, onCollapse }) {
+export function createPanel({ store, sortOptions = [], sortValue = "", onSortChange, onCollapse }) {
   const panel = createElement("section", { className: "bf-panel" });
 
   const header = createElement("header", { className: "bf-panel__header" });
@@ -18,9 +18,30 @@ export function createPanel({ store, onCollapse }) {
   header.append(brand, collapseButton);
 
   const body = createElement("div", { className: "bf-panel__body" });
+  const sortSection = createElement("div", { className: "bf-sort" });
+  const sortLabel = createElement("label", { className: "bf-sort__label", text: "Standaard sortering" });
+  const sortSelect = createElement("select", {
+    className: "bf-select",
+    attrs: { "aria-label": "Standaard sortering" }
+  });
+  sortOptions.forEach((option) => {
+    const optionEl = createElement("option", { text: option.label });
+    optionEl.value = option.value;
+    sortSelect.appendChild(optionEl);
+  });
+  sortSelect.value = sortValue;
+  sortSelect.addEventListener("change", (event) => {
+    if (typeof onSortChange === "function") {
+      onSortChange(event.target.value);
+    }
+  });
+  const sortMain = createElement("div", { className: "bf-sort__main" });
+  sortMain.append(sortLabel, sortSelect);
+  sortSection.append(sortMain);
+
   const sectionTitle = createElement("div", { className: "bf-section-title", text: "Filteropties" });
   const togglesList = createElement("div", { className: "bf-toggle-list" });
-  body.append(sectionTitle, togglesList);
+  body.append(sortSection, sectionTitle, togglesList);
 
   panel.append(header, body);
 

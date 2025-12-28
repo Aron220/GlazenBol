@@ -3,7 +3,13 @@ import { createFloatingButton } from "./ui/floatingButton.js";
 import { createToggleStore } from "./state/toggleState.js";
 import { injectStylesheet } from "./utils/dom.js";
 import { storageGet, storageSet } from "./utils/storage.js";
-import { DEFAULT_TOGGLES, EXTENSION_NAME, TOGGLE_STATE_KEY } from "../shared/constants.js";
+import {
+  DEFAULT_TOGGLES,
+  EXTENSION_NAME,
+  SORT_OPTIONS,
+  SORT_PREFERENCE_KEY,
+  TOGGLE_STATE_KEY
+} from "../shared/constants.js";
 import { createMerkloosFilter } from "./filters/merkloosFilter.js";
 import { createGesponsordFilter } from "./filters/gesponsordFilter.js";
 import { createGeneralAdsFilter } from "./filters/generalAdsFilter.js";
@@ -28,12 +34,59 @@ const mergeToggles = (defaults, persisted) => defaults.map((toggle) => {
   return { ...toggle };
 });
 
+const loadSortPreference = async () => {
+  const result = await storageGet(SORT_PREFERENCE_KEY);
+  if (!result || typeof result !== "object") return "";
+  const preference = result[SORT_PREFERENCE_KEY];
+  return typeof preference === "string" ? preference : "";
+};
+
+const normalizeSortPreference = (value) => {
+  const allowed = new Set(SORT_OPTIONS.map((option) => option.value));
+  return allowed.has(value) ? value : "";
+};
+
 const persistToggleState = (list) => {
   const state = {};
   list.forEach((toggle) => {
     state[toggle.id] = Boolean(toggle.enabled);
   });
   return storageSet({ [TOGGLE_STATE_KEY]: state });
+};
+
+const persistSortPreference = (value) => storageSet({ [SORT_PREFERENCE_KEY]: value });
+
+const findSortSelect = () => {
+  const selects = Array.from(document.querySelectorAll("select"));
+  return selects.find((select) => {
+    if (!select.options || select.options.length === 0) return false;
+    const optionValues = Array.from(select.options).map((option) => option.value);
+    return optionValues.includes("RELEVANCE") && optionValues.includes("POPULARITY");
+  });
+};
+
+const applySortPreference = (preference) => {
+  if (!preference) return false;
+  const select = findSortSelect();
+  if (!select) return false;
+  if (select.value === preference) return true;
+  select.value = preference;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+  return true;
+};
+
+const scheduleSortPreference = (preference) => {
+  if (!preference) return;
+  let attempts = 0;
+  const maxAttempts = 20;
+  const attempt = () => {
+    if (applySortPreference(preference)) return;
+    attempts += 1;
+    if (attempts < maxAttempts) {
+      setTimeout(attempt, 250);
+    }
+  };
+  attempt();
 };
 
 async function init() {
@@ -52,6 +105,7 @@ async function init() {
   injectStylesheet(shadow, chrome.runtime.getURL("src/content/styles/panel.css"));
 
   const persistedToggles = await loadToggleState();
+  const persistedSortPreference = normalizeSortPreference(await loadSortPreference());
   const store = createToggleStore(mergeToggles(DEFAULT_TOGGLES, persistedToggles));
   const filters = {
     "filter-merkloos": createMerkloosFilter(),
@@ -68,6 +122,13 @@ async function init() {
 
   const panel = createPanel({
     store,
+    sortOptions: SORT_OPTIONS,
+    sortValue: persistedSortPreference,
+    onSortChange: (value) => {
+      const normalized = normalizeSortPreference(value);
+      void persistSortPreference(normalized);
+      scheduleSortPreference(normalized);
+    },
     onCollapse: () => setCollapsed(true)
   });
 
@@ -94,6 +155,7 @@ async function init() {
     emptyPageMonitor.scheduleCheck();
   });
 
+  scheduleSortPreference(persistedSortPreference);
   setCollapsed(false);
 }
 

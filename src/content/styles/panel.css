@@ -85,6 +85,41 @@
   flex-direction: column;
 }
 
+.bf-sort {
+  padding: 10px 12px;
+  border: 1px solid #e4e8ee;
+  border-radius: 10px;
+  background: #f9fbfd;
+}
+
+.bf-sort__main {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.bf-sort__label {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.bf-select {
+  border: 1px solid #d5dbe3;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 170px;
+}
+
+.bf-select:focus {
+  outline: 2px solid #7ccaf3;
+  outline-offset: 1px;
+}
+
 .bf-section-title {
   font-weight: 700;
   color: #334155;
