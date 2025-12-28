@@ -11,6 +11,7 @@
     "persistent": false
   },
   "permissions": [
+    "storage",
     "https://www.bol.com/*",
     "http://www.bol.com/*"
   ],

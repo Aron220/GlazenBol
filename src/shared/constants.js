@@ -1,4 +1,5 @@
 export const EXTENSION_NAME = "BolFilter";
+export const TOGGLE_STATE_KEY = "bolFilterToggleState";
 
 export const DEFAULT_TOGGLES = [
   {
