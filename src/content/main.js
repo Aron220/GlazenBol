@@ -8,6 +8,7 @@ import { createMerkloosFilter } from "./filters/merkloosFilter.js";
 import { createGesponsordFilter } from "./filters/gesponsordFilter.js";
 import { createGeneralAdsFilter } from "./filters/generalAdsFilter.js";
 import { createVerkoopDoorBolFilter } from "./filters/verkoopDoorBolFilter.js";
+import { createEmptyPageMonitor } from "./emptyPageMonitor.js";
 
 const ROOT_ID = "bol-filter-root";
 let initialized = false;
@@ -58,6 +59,7 @@ async function init() {
     "filter-general-ads": createGeneralAdsFilter(),
     "filter-verkoop-door-bol": createVerkoopDoorBolFilter()
   };
+  const emptyPageMonitor = createEmptyPageMonitor({ root: shadow });
 
   const setCollapsed = (isCollapsed) => {
     panel.setVisible(!isCollapsed);
@@ -78,6 +80,8 @@ async function init() {
   document.body.appendChild(host);
 
   Object.values(filters).forEach((filter) => filter.observe());
+  emptyPageMonitor.observe();
+  emptyPageMonitor.scheduleCheck({ delayMs: 300 });
 
   store.subscribe((list) => {
     list.forEach((toggle) => {
@@ -87,6 +91,7 @@ async function init() {
       }
     });
     void persistToggleState(list);
+    emptyPageMonitor.scheduleCheck();
   });
 
   setCollapsed(false);

@@ -189,3 +189,27 @@
 .bf-floating-button:hover {
   background: #f2f5f8;
 }
+
+.bf-empty-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 40px);
+  opacity: 0;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-weight: 600;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+  transition: transform 0.26s cubic-bezier(0.21, 0.61, 0.35, 1), opacity 0.2s ease;
+  z-index: 2147483647;
+  pointer-events: none;
+  max-width: min(90vw, 420px);
+  text-align: center;
+}
+
+.bf-empty-toast.visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
