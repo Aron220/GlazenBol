@@ -78,7 +78,8 @@ export function createPanel({ store, sortOptions = [], sortValue = "", onSortCha
   };
 
   const setVisible = (isVisible) => {
-    panel.style.display = isVisible ? "flex" : "none";
+    panel.classList.toggle("bf-panel--collapsed", !isVisible);
+    panel.setAttribute("aria-hidden", String(!isVisible));
   };
 
   const unsubscribe = store.subscribe(renderToggles);
