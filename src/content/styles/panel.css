@@ -47,6 +47,12 @@
   border-bottom: 1px solid #e3e8ed;
 }
 
+.bf-panel__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .bf-brand {
   display: inline-flex;
   align-items: center;
@@ -93,6 +99,25 @@
 
 .bf-button--ghost {
   background: transparent;
+}
+
+.bf-button--icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.bf-button--primary {
+  background: linear-gradient(135deg, #0bbd3e, #00c853);
+  color: #ffffff;
+  border-color: #0bbd3e;
+}
+
+.bf-button--primary:hover {
+  background: linear-gradient(135deg, #0aa535, #00b449);
 }
 
 .bf-panel__body {
@@ -287,12 +312,88 @@
   opacity: 1;
 }
 
+.bf-welcome {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 2147483647;
+}
+
+.bf-welcome--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bf-welcome__card {
+  width: min(92vw, 420px);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bf-welcome__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bf-welcome__eyebrow {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0bbd3e;
+}
+
+.bf-welcome__title {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #0f172a;
+}
+
+.bf-welcome__intro {
+  margin: 0;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.bf-welcome__steps {
+  margin: 0;
+  padding-left: 18px;
+  color: #1f2937;
+  line-height: 1.5;
+  display: grid;
+  gap: 6px;
+}
+
+.bf-welcome__hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+.bf-welcome__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bf-panel,
   .bf-panel.bf-panel--collapsed,
   .bf-floating-button,
   .bf-floating-button.bf-floating-button--visible,
-  .bf-empty-toast {
+  .bf-empty-toast,
+  .bf-welcome {
     transition: none;
   }
 }

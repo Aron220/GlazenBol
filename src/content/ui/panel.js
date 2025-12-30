@@ -1,7 +1,14 @@
 import { createElement } from "../utils/dom.js";
 import { EXTENSION_NAME } from "../../shared/constants.js";
 
-export function createPanel({ store, sortOptions = [], sortValue = "", onSortChange, onCollapse }) {
+export function createPanel({
+  store,
+  sortOptions = [],
+  sortValue = "",
+  onSortChange,
+  onCollapse,
+  onHelp
+}) {
   const panel = createElement("section", { className: "bf-panel" });
 
   const header = createElement("header", { className: "bf-panel__header" });
@@ -11,11 +18,22 @@ export function createPanel({ store, sortOptions = [], sortValue = "", onSortCha
   const brandStatus = createElement("span", { className: "bf-brand__status", text: "Aan" });
   brand.append(brandDot, brandName, brandStatus);
 
+  const actions = createElement("div", { className: "bf-panel__actions" });
+  const helpButton = createElement("button", { className: "bf-button bf-button--ghost bf-button--icon", text: "?" });
+  helpButton.type = "button";
+  helpButton.setAttribute("aria-label", "Uitleg");
+  helpButton.addEventListener("click", () => {
+    if (typeof onHelp === "function") {
+      onHelp();
+    }
+  });
+
   const collapseButton = createElement("button", { className: "bf-button bf-button--ghost", text: "▼" });
   collapseButton.type = "button";
   collapseButton.addEventListener("click", () => onCollapse());
 
-  header.append(brand, collapseButton);
+  actions.append(helpButton, collapseButton);
+  header.append(brand, actions);
 
   const body = createElement("div", { className: "bf-panel__body" });
   const sortSection = createElement("div", { className: "bf-sort" });

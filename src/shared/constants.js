@@ -1,6 +1,8 @@
 export const EXTENSION_NAME = "BolFilter";
 export const TOGGLE_STATE_KEY = "bolFilterToggleState";
 export const SORT_PREFERENCE_KEY = "bolFilterSortPreference";
+export const WELCOME_SEEN_KEY = "bolFilterWelcomeSeen";
+export const PANEL_COLLAPSED_KEY = "bolFilterPanelCollapsed";
 
 export const SORT_OPTIONS = [
   { value: "", label: "Geen voorkeur" },

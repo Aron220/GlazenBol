@@ -1,14 +1,17 @@
 import { createPanel } from "./ui/panel.js";
 import { createFloatingButton } from "./ui/floatingButton.js";
+import { createWelcomeOverlay } from "./ui/welcomeOverlay.js";
 import { createToggleStore } from "./state/toggleState.js";
 import { injectStylesheet } from "./utils/dom.js";
 import { storageGet, storageSet } from "./utils/storage.js";
 import {
   DEFAULT_TOGGLES,
   EXTENSION_NAME,
+  PANEL_COLLAPSED_KEY,
   SORT_OPTIONS,
   SORT_PREFERENCE_KEY,
-  TOGGLE_STATE_KEY
+  TOGGLE_STATE_KEY,
+  WELCOME_SEEN_KEY
 } from "../shared/constants.js";
 import { createMerkloosFilter } from "./filters/merkloosFilter.js";
 import { createGesponsordFilter } from "./filters/gesponsordFilter.js";
@@ -55,6 +58,21 @@ const persistToggleState = (list) => {
 };
 
 const persistSortPreference = (value) => storageSet({ [SORT_PREFERENCE_KEY]: value });
+const persistWelcomeSeen = () => storageSet({ [WELCOME_SEEN_KEY]: true });
+const persistPanelCollapsed = (isCollapsed) => storageSet({ [PANEL_COLLAPSED_KEY]: Boolean(isCollapsed) });
+
+const loadWelcomeSeen = async () => {
+  const result = await storageGet(WELCOME_SEEN_KEY);
+  if (!result || typeof result !== "object") return false;
+  return Boolean(result[WELCOME_SEEN_KEY]);
+};
+
+const loadPanelCollapsed = async () => {
+  const result = await storageGet(PANEL_COLLAPSED_KEY);
+  if (!result || typeof result !== "object") return false;
+  const value = result[PANEL_COLLAPSED_KEY];
+  return typeof value === "boolean" ? value : false;
+};
 
 const findSortSelect = () => {
   const selects = Array.from(document.querySelectorAll("select"));
@@ -104,8 +122,11 @@ async function init() {
   const shadow = host.attachShadow({ mode: "open" });
   injectStylesheet(shadow, chrome.runtime.getURL("src/content/styles/panel.css"));
 
+  const welcomeOverlay = createWelcomeOverlay();
   const persistedToggles = await loadToggleState();
   const persistedSortPreference = normalizeSortPreference(await loadSortPreference());
+  const welcomeSeen = await loadWelcomeSeen();
+  const persistedPanelCollapsed = await loadPanelCollapsed();
   const store = createToggleStore(mergeToggles(DEFAULT_TOGGLES, persistedToggles));
   const filters = {
     "filter-merkloos": createMerkloosFilter(),
@@ -115,9 +136,12 @@ async function init() {
   };
   const emptyPageMonitor = createEmptyPageMonitor({ root: shadow });
 
-  const setCollapsed = (isCollapsed) => {
+  const setCollapsed = (isCollapsed, { persist = true } = {}) => {
     panel.setVisible(!isCollapsed);
     floatingButton.setVisible(isCollapsed);
+    if (persist) {
+      void persistPanelCollapsed(isCollapsed);
+    }
   };
 
   const panel = createPanel({
@@ -129,7 +153,8 @@ async function init() {
       void persistSortPreference(normalized);
       scheduleSortPreference(normalized);
     },
-    onCollapse: () => setCollapsed(true)
+    onCollapse: () => setCollapsed(true),
+    onHelp: () => welcomeOverlay.show()
   });
 
   const floatingButton = createFloatingButton({
@@ -137,7 +162,7 @@ async function init() {
     onExpand: () => setCollapsed(false)
   });
 
-  shadow.append(panel.element, floatingButton.element);
+  shadow.append(panel.element, floatingButton.element, welcomeOverlay.element);
   document.body.appendChild(host);
 
   Object.values(filters).forEach((filter) => filter.observe());
@@ -156,7 +181,12 @@ async function init() {
   });
 
   scheduleSortPreference(persistedSortPreference);
-  setCollapsed(false);
+  setCollapsed(persistedPanelCollapsed, { persist: false });
+
+  if (!welcomeSeen) {
+    void persistWelcomeSeen();
+    welcomeOverlay.show();
+  }
 }
 
 if (document.readyState === "loading") {
