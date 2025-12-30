@@ -1,4 +1,4 @@
-# Bol Filter Extension
+# GlazenBol Extension
 
 Browser extension scaffold for bol.com that injects a collapsible control panel to manage filtering toggles.
 

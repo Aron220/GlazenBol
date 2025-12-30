@@ -13,10 +13,16 @@ export function createPanel({
 
   const header = createElement("header", { className: "bf-panel__header" });
   const brand = createElement("div", { className: "bf-brand" });
-  const brandDot = createElement("span", { className: "bf-brand__dot" });
+  const brandLogo = createElement("img", {
+    className: "bf-brand__logo",
+    attrs: {
+      src: chrome.runtime.getURL("images/glazenbol.png"),
+      alt: "GlazenBol logo"
+    }
+  });
   const brandName = createElement("span", { className: "bf-brand__name", text: EXTENSION_NAME });
   const brandStatus = createElement("span", { className: "bf-brand__status", text: "Aan" });
-  brand.append(brandDot, brandName, brandStatus);
+  brand.append(brandLogo, brandName, brandStatus);
 
   const actions = createElement("div", { className: "bf-panel__actions" });
   const helpButton = createElement("button", { className: "bf-button bf-button--ghost bf-button--icon", text: "?" });

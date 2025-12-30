@@ -1,8 +1,8 @@
-export const EXTENSION_NAME = "BolFilter";
-export const TOGGLE_STATE_KEY = "bolFilterToggleState";
-export const SORT_PREFERENCE_KEY = "bolFilterSortPreference";
-export const WELCOME_SEEN_KEY = "bolFilterWelcomeSeen";
-export const PANEL_COLLAPSED_KEY = "bolFilterPanelCollapsed";
+export const EXTENSION_NAME = "GlazenBol";
+export const TOGGLE_STATE_KEY = "glazenBolToggleState";
+export const SORT_PREFERENCE_KEY = "glazenBolSortPreference";
+export const WELCOME_SEEN_KEY = "glazenBolWelcomeSeen";
+export const PANEL_COLLAPSED_KEY = "glazenBolPanelCollapsed";
 
 export const SORT_OPTIONS = [
   { value: "", label: "Geen voorkeur" },

@@ -61,12 +61,12 @@
   letter-spacing: 0.01em;
 }
 
-.bf-brand__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00c853, #0bbd3e);
-  box-shadow: 0 0 0 3px rgba(11, 189, 62, 0.12);
+.bf-brand__logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px rgba(63, 116, 190, 0.2);
 }
 
 .bf-brand__name {
@@ -345,6 +345,20 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+  padding-right: 104px;
+}
+
+.bf-welcome__logo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+  background: #f8fafc;
 }
 
 .bf-welcome__eyebrow {

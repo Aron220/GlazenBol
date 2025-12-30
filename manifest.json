@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
-  "name": "Bol Filter",
+  "name": "GlazenBol",
   "version": "0.1.0",
   "description": "Filter junk and dropshipper listings on bol.com with a collapsible control panel.",
   "browser_action": {
-    "default_title": "Bol Filter"
+    "default_title": "GlazenBol"
   },
   "background": {
     "scripts": ["src/background/index.js"],
@@ -31,6 +31,7 @@
     "src/content/ui/*",
     "src/content/state/*",
     "src/content/utils/*",
-    "src/content/styles/*"
+    "src/content/styles/*",
+    "images/*"
   ]
 }

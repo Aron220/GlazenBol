@@ -9,17 +9,24 @@ export function createWelcomeOverlay() {
 
   const card = createElement("div", { className: "bf-welcome__card" });
   const header = createElement("div", { className: "bf-welcome__header" });
+  const logo = createElement("img", {
+    className: "bf-welcome__logo",
+    attrs: {
+      src: chrome.runtime.getURL("images/glazenbol.png"),
+      alt: "GlazenBol"
+    }
+  });
   const eyebrow = createElement("span", { className: "bf-welcome__eyebrow", text: `Welkom bij ${EXTENSION_NAME}` });
   const title = createElement("h2", { className: "bf-welcome__title", text: "Fijn dat je er bent!" });
   const intro = createElement("p", {
     className: "bf-welcome__intro",
     text: "Met deze extensie houd je bol.com overzichtelijk en gefocust."
   });
-  header.append(eyebrow, title, intro);
+  header.append(logo, eyebrow, title, intro);
 
   const steps = createElement("ol", { className: "bf-welcome__steps" });
   const stepItems = [
-    "Open het paneel rechtsonder (BolFilter-knop) als je het niet ziet.",
+    "Open het paneel rechtsonder (GlazenBol-knop) als je het niet ziet.",
     "Kies een standaard sortering zodat elke pagina direct goed staat.",
     "Schakel filters in of uit om resultaten te schonen.",
     "Klik op het pijltje om het paneel te minimaliseren."
