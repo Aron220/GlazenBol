@@ -21,8 +21,7 @@ export function createPanel({
     }
   });
   const brandName = createElement("span", { className: "bf-brand__name", text: EXTENSION_NAME });
-  const brandStatus = createElement("span", { className: "bf-brand__status", text: "Aan" });
-  brand.append(brandLogo, brandName, brandStatus);
+  brand.append(brandLogo, brandName);
 
   const actions = createElement("div", { className: "bf-panel__actions" });
   const helpButton = createElement("button", { className: "bf-button bf-button--ghost bf-button--icon", text: "?" });

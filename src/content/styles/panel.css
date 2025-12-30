@@ -73,15 +73,6 @@
   color: #0f172a;
 }
 
-.bf-brand__status {
-  font-size: 0.85rem;
-  color: #14773f;
-  background: #ecf9f1;
-  padding: 3px 8px;
-  border-radius: 999px;
-  border: 1px solid #c9ebd7;
-}
-
 .bf-button {
   border: 1px solid #d5dbe3;
   background: #ffffff;
