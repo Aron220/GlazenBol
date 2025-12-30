@@ -17,6 +17,7 @@ import { createMerkloosFilter } from "./filters/merkloosFilter.js";
 import { createGesponsordFilter } from "./filters/gesponsordFilter.js";
 import { createGeneralAdsFilter } from "./filters/generalAdsFilter.js";
 import { createVerkoopDoorBolFilter } from "./filters/verkoopDoorBolFilter.js";
+import { createGoedeKeuzeFilter } from "./filters/goedeKeuzeFilter.js";
 import { createEmptyPageMonitor } from "./emptyPageMonitor.js";
 
 const ROOT_ID = "bol-filter-root";
@@ -159,6 +160,7 @@ async function init() {
     "filter-merkloos": createMerkloosFilter(),
     "filter-gesponsord": createGesponsordFilter(),
     "filter-general-ads": createGeneralAdsFilter(),
+    "filter-goede-keuze": createGoedeKeuzeFilter(),
     "filter-verkoop-door-bol": createVerkoopDoorBolFilter()
   };
   const emptyPageMonitor = createEmptyPageMonitor({ root: shadow });

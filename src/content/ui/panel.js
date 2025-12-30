@@ -84,6 +84,19 @@ export function createPanel({
     switchEl.appendChild(switchKnob);
 
     main.append(textWrap, input, switchEl);
+    if (toggle.badgeSvg) {
+      name.classList.add("bf-toggle__label--with-badge");
+      const badge = createElement("span", {
+        className: "bf-toggle__badge",
+        attrs: {
+          role: "img",
+          "aria-label": toggle.badgeAlt || ""
+        }
+      });
+      badge.innerHTML = toggle.badgeSvg;
+      name.appendChild(badge);
+    }
+
     textWrap.appendChild(name);
 
     if (toggle.description) {

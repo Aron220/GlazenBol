@@ -193,6 +193,24 @@
   color: #0f172a;
 }
 
+.bf-toggle__label--with-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bf-toggle__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bf-toggle__badge svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
 .bf-toggle__description {
   margin: 0;
   color: #6b7280;
