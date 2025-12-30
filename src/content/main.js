@@ -74,13 +74,40 @@ const loadPanelCollapsed = async () => {
   return typeof value === "boolean" ? value : false;
 };
 
+const SORT_OPTION_VALUES = new Set(
+  SORT_OPTIONS.map((option) => option.value).filter(Boolean)
+);
+
+const getSortLabelText = (select) => {
+  const label = select.getAttribute("label");
+  if (label) return label;
+  const ariaLabel = select.getAttribute("aria-label");
+  if (ariaLabel) return ariaLabel;
+  const labelledBy = select.getAttribute("aria-labelledby");
+  if (labelledBy) {
+    const labelEl = document.getElementById(labelledBy);
+    if (labelEl && labelEl.textContent) return labelEl.textContent.trim();
+  }
+  if (select.id) {
+    const labelEl = document.querySelector(`label[for="${select.id}"]`);
+    if (labelEl && labelEl.textContent) return labelEl.textContent.trim();
+  }
+  return "";
+};
+
+const isSortSelect = (select) => {
+  if (!select.options || select.options.length === 0) return false;
+  const optionValues = Array.from(select.options).map((option) => option.value);
+  const matches = optionValues.filter((value) => SORT_OPTION_VALUES.has(value));
+  if (matches.length < 2) return false;
+  return matches.includes("RELEVANCE") || matches.includes("POPULARITY");
+};
+
 const findSortSelect = () => {
   const selects = Array.from(document.querySelectorAll("select"));
-  return selects.find((select) => {
-    if (!select.options || select.options.length === 0) return false;
-    const optionValues = Array.from(select.options).map((option) => option.value);
-    return optionValues.includes("RELEVANCE") && optionValues.includes("POPULARITY");
-  });
+  const labeled = selects.find((select) => /sort/i.test(getSortLabelText(select)));
+  if (labeled) return labeled;
+  return selects.find((select) => isSortSelect(select));
 };
 
 const applySortPreference = (preference) => {
