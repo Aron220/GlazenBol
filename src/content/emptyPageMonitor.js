@@ -81,7 +81,7 @@ function checkForEmptyPage({ root }) {
   if (visibleListings.length === 0) {
     showEmptyPageToast({
       root,
-      message: "De pagina is leeg omdat deze helemaal uit advertenties bestond! Probeer een volgende pagina of wijzig de filters."
+      message: "Geen resultaten! Met de huidige filters staan er op deze pagina geen producten. Pas je filters aan of ga verder."
     });
     return;
   }
