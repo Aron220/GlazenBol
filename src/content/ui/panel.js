@@ -3,6 +3,7 @@ import { EXTENSION_NAME } from "../../shared/constants.js";
 
 export function createPanel({
   store,
+  blockedSellerStore,
   sortOptions = [],
   sortValue = "",
   onSortChange,
@@ -41,6 +42,9 @@ export function createPanel({
   header.append(brand, actions);
 
   const body = createElement("div", { className: "bf-panel__body" });
+  const view = createElement("div", { className: "bf-panel__view" });
+  const mainView = createElement("div", { className: "bf-panel__view-panel bf-panel__view-panel--active" });
+  const blockedView = createElement("div", { className: "bf-panel__view-panel" });
   const sortSection = createElement("div", { className: "bf-sort" });
   const sortLabel = createElement("label", { className: "bf-sort__label", text: "Standaard sortering" });
   const sortSelect = createElement("select", {
@@ -64,7 +68,34 @@ export function createPanel({
 
   const sectionTitle = createElement("div", { className: "bf-section-title", text: "Filteropties" });
   const togglesList = createElement("div", { className: "bf-toggle-list" });
-  body.append(sortSection, sectionTitle, togglesList);
+  const blockedTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde verkopers" });
+  const blockedManageButton = createElement("button", {
+    className: "bf-button bf-button--ghost bf-button--block",
+    text: "Beheer geblokkeerde verkopers"
+  });
+  blockedManageButton.type = "button";
+  const blockedWrap = createElement("div", { className: "bf-blocked" });
+  const blockedList = createElement("div", { className: "bf-blocked__list" });
+  const blockedEmpty = createElement("p", {
+    className: "bf-blocked__empty",
+    text: "Nog geen verkopers geblokkeerd."
+  });
+  const blockedHint = createElement("p", {
+    className: "bf-blocked__hint",
+    text: "Je kunt een verkoper blokkeren door in de zoekresultaten op de knop Blokkeer naast de verkoper te klikken."
+  });
+  blockedWrap.append(blockedList, blockedEmpty, blockedHint);
+  mainView.append(sortSection, sectionTitle, togglesList, blockedTitle, blockedManageButton);
+
+  const blockedHeader = createElement("div", { className: "bf-blocked__header" });
+  const blockedHeaderTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde verkopers" });
+  const backButton = createElement("button", { className: "bf-button bf-button--ghost", text: "Terug" });
+  backButton.type = "button";
+  blockedHeader.append(blockedHeaderTitle, backButton);
+  blockedView.append(blockedHeader, blockedWrap);
+
+  view.append(mainView, blockedView);
+  body.append(view);
 
   panel.append(header, body);
 
@@ -119,12 +150,57 @@ export function createPanel({
   };
 
   const unsubscribe = store.subscribe(renderToggles);
+  let unsubscribeBlocked = null;
+
+  const renderBlockedSellers = (snapshot) => {
+    const sellers = (snapshot && snapshot.sellers) || [];
+    blockedManageButton.textContent = `Beheer geblokkeerde verkopers (${sellers.length})`;
+    blockedList.innerHTML = "";
+    if (!sellers.length) {
+      blockedEmpty.style.display = "block";
+      blockedHint.style.display = "block";
+      return;
+    }
+    blockedEmpty.style.display = "none";
+    blockedHint.style.display = "none";
+    sellers.forEach((seller) => {
+      const item = createElement("div", { className: "bf-blocked__item" });
+      const name = createElement("span", { className: "bf-blocked__name", text: seller });
+      const button = createElement("button", { className: "bf-button bf-button--ghost bf-button--small", text: "Ontblokkeer" });
+      button.type = "button";
+      button.addEventListener("click", () => {
+        if (blockedSellerStore && typeof blockedSellerStore.removeSeller === "function") {
+          blockedSellerStore.removeSeller(seller);
+        }
+      });
+      item.append(name, button);
+      blockedList.appendChild(item);
+    });
+  };
+
+  if (blockedSellerStore && typeof blockedSellerStore.subscribe === "function") {
+    unsubscribeBlocked = blockedSellerStore.subscribe(renderBlockedSellers);
+  } else {
+    renderBlockedSellers({ sellers: [] });
+  }
+
+  const setView = (target) => {
+    const isBlocked = target === "blocked";
+    mainView.classList.toggle("bf-panel__view-panel--active", !isBlocked);
+    blockedView.classList.toggle("bf-panel__view-panel--active", isBlocked);
+  };
+
+  blockedManageButton.addEventListener("click", () => setView("blocked"));
+  backButton.addEventListener("click", () => setView("main"));
 
   return {
     element: panel,
     setVisible,
     destroy: () => {
       unsubscribe();
+      if (unsubscribeBlocked) {
+        unsubscribeBlocked();
+      }
       panel.remove();
     }
   };

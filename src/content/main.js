@@ -2,9 +2,11 @@ import { createPanel } from "./ui/panel.js";
 import { createFloatingButton } from "./ui/floatingButton.js";
 import { createWelcomeOverlay } from "./ui/welcomeOverlay.js";
 import { createToggleStore } from "./state/toggleState.js";
+import { createBlockedSellerStore } from "./state/blockedSellerState.js";
 import { injectStylesheet } from "./utils/dom.js";
 import { storageGet, storageSet } from "./utils/storage.js";
 import {
+  BLOCKED_SELLERS_KEY,
   DEFAULT_TOGGLES,
   EXTENSION_NAME,
   PANEL_COLLAPSED_KEY,
@@ -18,6 +20,7 @@ import { createGesponsordFilter } from "./filters/gesponsordFilter.js";
 import { createGeneralAdsFilter } from "./filters/generalAdsFilter.js";
 import { createVerkoopDoorBolFilter } from "./filters/verkoopDoorBolFilter.js";
 import { createGoedeKeuzeFilter } from "./filters/goedeKeuzeFilter.js";
+import { createSellerBlockFilter } from "./filters/sellerBlockFilter.js";
 import { createEmptyPageMonitor } from "./emptyPageMonitor.js";
 
 const ROOT_ID = "bol-filter-root";
@@ -45,6 +48,13 @@ const loadSortPreference = async () => {
   return typeof preference === "string" ? preference : "";
 };
 
+const loadBlockedSellers = async () => {
+  const result = await storageGet(BLOCKED_SELLERS_KEY);
+  if (!result || typeof result !== "object") return [];
+  const sellers = result[BLOCKED_SELLERS_KEY];
+  return Array.isArray(sellers) ? sellers.filter((entry) => typeof entry === "string") : [];
+};
+
 const normalizeSortPreference = (value) => {
   const allowed = new Set(SORT_OPTIONS.map((option) => option.value));
   return allowed.has(value) ? value : "";
@@ -61,6 +71,7 @@ const persistToggleState = (list) => {
 const persistSortPreference = (value) => storageSet({ [SORT_PREFERENCE_KEY]: value });
 const persistWelcomeSeen = () => storageSet({ [WELCOME_SEEN_KEY]: true });
 const persistPanelCollapsed = (isCollapsed) => storageSet({ [PANEL_COLLAPSED_KEY]: Boolean(isCollapsed) });
+const persistBlockedSellers = (sellers) => storageSet({ [BLOCKED_SELLERS_KEY]: sellers });
 
 const loadWelcomeSeen = async () => {
   const result = await storageGet(WELCOME_SEEN_KEY);
@@ -153,15 +164,18 @@ async function init() {
   const welcomeOverlay = createWelcomeOverlay();
   const persistedToggles = await loadToggleState();
   const persistedSortPreference = normalizeSortPreference(await loadSortPreference());
+  const persistedBlockedSellers = await loadBlockedSellers();
   const welcomeSeen = await loadWelcomeSeen();
   const persistedPanelCollapsed = await loadPanelCollapsed();
   const store = createToggleStore(mergeToggles(DEFAULT_TOGGLES, persistedToggles));
+  const blockedSellerStore = createBlockedSellerStore(persistedBlockedSellers);
   const filters = {
     "filter-merkloos": createMerkloosFilter(),
     "filter-gesponsord": createGesponsordFilter(),
     "filter-general-ads": createGeneralAdsFilter(),
     "filter-goede-keuze": createGoedeKeuzeFilter(),
-    "filter-verkoop-door-bol": createVerkoopDoorBolFilter()
+    "filter-verkoop-door-bol": createVerkoopDoorBolFilter(),
+    "filter-seller-block": createSellerBlockFilter({ store: blockedSellerStore })
   };
   const emptyPageMonitor = createEmptyPageMonitor({ root: shadow });
 
@@ -175,6 +189,7 @@ async function init() {
 
   const panel = createPanel({
     store,
+    blockedSellerStore,
     sortOptions: SORT_OPTIONS,
     sortValue: persistedSortPreference,
     onSortChange: (value) => {
@@ -206,6 +221,11 @@ async function init() {
       }
     });
     void persistToggleState(list);
+    emptyPageMonitor.scheduleCheck();
+  });
+
+  blockedSellerStore.subscribe(({ sellers }) => {
+    void persistBlockedSellers(sellers);
     emptyPageMonitor.scheduleCheck();
   });
 

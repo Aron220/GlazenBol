@@ -101,6 +101,18 @@
   line-height: 1;
 }
 
+.bf-button--small {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 999px;
+}
+
+.bf-button--block {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
 .bf-button--primary {
   background: linear-gradient(135deg, #0bbd3e, #00c853);
   color: #ffffff;
@@ -117,6 +129,22 @@
   gap: 10px;
   display: flex;
   flex-direction: column;
+}
+
+.bf-panel__view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bf-panel__view-panel {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bf-panel__view-panel--active {
+  display: flex;
 }
 
 .bf-sort {
@@ -165,6 +193,55 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.bf-blocked {
+  border: 1px dashed #e4e8ee;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f9fbfd;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-blocked__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bf-blocked__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bf-blocked__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.bf-blocked__name {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.bf-blocked__empty {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.bf-blocked__hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .bf-toggle {
