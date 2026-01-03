@@ -168,7 +168,22 @@ export function createPanel({
   view.append(mainView, blockedSellerView, blockedBrandView);
   body.append(view);
 
-  panel.append(header, body);
+  const footer = createElement("footer", { className: "bf-panel__footer" });
+  const bmcWrap = createElement("div", { className: "bf-bmc" });
+  const bmcLink = createElement("a", {
+    className: "bf-bmc__button",
+    text: "☕ Buy me a coffee",
+    attrs: {
+      href: "https://www.buymeacoffee.com/cleanplaats",
+      target: "_blank",
+      rel: "noopener noreferrer",
+      "aria-label": "Buy me a coffee (opens in a new tab)"
+    }
+  });
+  bmcWrap.appendChild(bmcLink);
+  footer.appendChild(bmcWrap);
+
+  panel.append(header, body, footer);
 
   const renderToggle = (toggle) => {
     const item = createElement("label", { className: "bf-toggle" });
