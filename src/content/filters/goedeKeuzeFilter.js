@@ -1,8 +1,10 @@
 import { GOEDE_KEUZE_HIDDEN_ATTR, markHidden, unmarkHidden } from "./visibility.js";
 
-const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"]';
+const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"], a[href*="/p/"]';
 const LISTING_DATA_SELECTOR = '[data-bltgi*="ProductList"], [data-bltgh*="ProductList"]';
 const GOOD_CHOICE_LABELS = ["goede keuze", "duurzame keuze"];
+const LISTING_SELECTOR =
+  `${LISTING_DATA_SELECTOR}, [data-test*="product"], [role="listitem"], article, li`;
 
 function normalizeText(text) {
   return (text || "").trim().toLowerCase();
@@ -14,12 +16,10 @@ function isGoodChoiceLabel(text) {
 }
 
 function findListingRoot(startEl) {
-  const prefer =
-    startEl.closest(LISTING_DATA_SELECTOR) ||
-    startEl.closest('[data-test*="product"]') ||
-    startEl.closest('[role="listitem"]') ||
-    startEl.closest("article") ||
-    startEl.closest("li");
+  let prefer = startEl.closest(LISTING_SELECTOR);
+  if (prefer && prefer.matches(PRODUCT_LINK_SELECTOR)) {
+    prefer = prefer.parentElement ? prefer.parentElement.closest(LISTING_SELECTOR) : null;
+  }
   if (prefer && prefer !== document.body && prefer.querySelector(PRODUCT_LINK_SELECTOR)) return prefer;
 
   let node = startEl;
@@ -57,6 +57,14 @@ function collectListings() {
   return listings;
 }
 
+function listingHasGoodChoice(listing) {
+  const candidates = listing.querySelectorAll("span, div, p");
+  for (const el of candidates) {
+    if (isGoodChoiceLabel(el.textContent)) return true;
+  }
+  return false;
+}
+
 export function createGoedeKeuzeFilter() {
   let enabled = true;
   let scanTimer = null;
@@ -64,13 +72,10 @@ export function createGoedeKeuzeFilter() {
   const scan = () => {
     const listings = collectListings();
     const goodListings = new Set();
-
-    document.querySelectorAll("span, div, p").forEach((el) => {
-      const text = el.textContent || "";
-      if (!isGoodChoiceLabel(text)) return;
-      const listing = findListingRoot(el);
-      if (!listing) return;
-      goodListings.add(listing);
+    listings.forEach((listing) => {
+      if (listingHasGoodChoice(listing)) {
+        goodListings.add(listing);
+      }
     });
 
     listings.forEach((listing) => {
