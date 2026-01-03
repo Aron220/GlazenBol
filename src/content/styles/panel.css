@@ -270,6 +270,12 @@
   color: #0f172a;
 }
 
+.bf-toggle__label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .bf-toggle__label--with-badge {
   display: inline-flex;
   align-items: center;
@@ -286,6 +292,46 @@
   width: 16px;
   height: 16px;
   display: block;
+}
+
+.bf-tooltip-icon {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: #e0e0e0;
+  color: #757575;
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: help;
+}
+
+.bf-tooltip-icon:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+.bf-global-tooltip {
+  position: fixed;
+  z-index: 2147483648;
+  background-color: #555;
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 1;
+  pointer-events: none;
+  white-space: normal;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s;
+  left: 0;
+  top: 0;
+  display: none;
+  max-width: 220px;
 }
 
 .bf-toggle__description {

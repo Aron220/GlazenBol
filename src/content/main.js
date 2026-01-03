@@ -249,7 +249,7 @@ async function init() {
     onExpand: () => setCollapsed(false)
   });
 
-  shadow.append(panel.element, floatingButton.element, welcomeOverlay.element);
+  shadow.append(panel.element, panel.tooltipElement, floatingButton.element, welcomeOverlay.element);
   ensureHostAttached();
   startRootObserver();
 

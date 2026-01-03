@@ -22,18 +22,21 @@ export const DEFAULT_TOGGLES = [
     id: "filter-merkloos",
     label: "Merkloze producten wegfilteren",
     description: "",
+    tooltip: "Verbergt producten waarvan het merk als 'Merkloos' of 'Sans Marque' staat vermeld.",
     enabled: true
   },
   {
     id: "filter-gesponsord",
     label: "Gesponsorde producten wegfilteren",
     description: "",
+    tooltip: "Verbergt gesponsorde producten in de lijst.",
     enabled: true
   },
   {
     id: "filter-general-ads",
     label: "Advertentieblokken wegfilteren",
     description: "",
+    tooltip: "Verbergt gesponsorde advertentieblokken tussen de productresultaten.",
     enabled: true
   },
   {
@@ -57,12 +60,14 @@ export const DEFAULT_TOGGLES = [
       '<defs><clipPath id="clip0_289_726"><rect width="20" height="20" fill="white"></rect></clipPath></defs>' +
       "</svg>",
     badgeAlt: "Goede Keuze label",
+    tooltip: "Toont alleen producten met het label Goede keuze of Duurzame keuze.",
     enabled: false
   },
   {
     id: "filter-verkoop-door-bol",
     label: "Verkoop door Bol",
     description: "",
+    tooltip: "Verbergt producten die niet door bol.com worden verkocht.",
     enabled: false
   }
 ];

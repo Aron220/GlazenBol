@@ -12,6 +12,41 @@ export function createPanel({
   onHelp
 }) {
   const panel = createElement("section", { className: "bf-panel" });
+  const tooltip = createElement("div", { className: "bf-global-tooltip" });
+  tooltip.style.display = "none";
+
+  const attachTooltip = (icon) => {
+    const showTooltip = () => {
+      const text = icon.getAttribute("data-tooltip");
+      if (!text) return;
+
+      tooltip.textContent = text;
+      tooltip.style.display = "block";
+
+      const rect = icon.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+
+      let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
+
+      let top = rect.top - tooltipRect.height - 8;
+      if (top < 8) top = rect.bottom + 8;
+
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+      tooltip.style.opacity = "1";
+    };
+
+    const hideTooltip = () => {
+      tooltip.style.opacity = "0";
+      tooltip.style.display = "none";
+    };
+
+    icon.addEventListener("mouseenter", showTooltip);
+    icon.addEventListener("mouseleave", hideTooltip);
+    icon.addEventListener("focus", showTooltip);
+    icon.addEventListener("blur", hideTooltip);
+  };
 
   const header = createElement("header", { className: "bf-panel__header" });
   const brand = createElement("div", { className: "bf-brand" });
@@ -139,6 +174,7 @@ export function createPanel({
     const item = createElement("label", { className: "bf-toggle" });
     const main = createElement("div", { className: "bf-toggle__main" });
     const textWrap = createElement("div", { className: "bf-toggle__text" });
+    const labelRow = createElement("div", { className: "bf-toggle__label-row" });
     const name = createElement("span", { className: "bf-toggle__label", text: toggle.label });
     const input = createElement("input", { attrs: { type: "checkbox" }, className: "bf-switch__input" });
     input.checked = Boolean(toggle.enabled);
@@ -164,7 +200,23 @@ export function createPanel({
       name.appendChild(badge);
     }
 
-    textWrap.appendChild(name);
+    labelRow.appendChild(name);
+    if (toggle.tooltip) {
+      const help = createElement("span", {
+        className: "bf-tooltip-icon",
+        text: "?",
+        attrs: {
+          "data-tooltip": toggle.tooltip,
+          role: "img",
+          tabindex: "0",
+          "aria-label": `Info over ${toggle.label}`
+        }
+      });
+      attachTooltip(help);
+      labelRow.appendChild(help);
+    }
+
+    textWrap.appendChild(labelRow);
 
     if (toggle.description) {
       const desc = createElement("p", { className: "bf-toggle__description", text: toggle.description });
@@ -269,6 +321,7 @@ export function createPanel({
 
   return {
     element: panel,
+    tooltipElement: tooltip,
     setVisible,
     destroy: () => {
       unsubscribe();
