@@ -122,7 +122,7 @@ export function createEmptyPageMonitor({ root } = {}) {
   });
 
   const observe = () => {
-    observer.observe(document.body, {
+    observer.observe(document.documentElement, {
       childList: true,
       subtree: true,
       attributes: true,

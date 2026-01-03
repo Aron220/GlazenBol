@@ -28,6 +28,34 @@ import { createEmptyPageMonitor } from "./emptyPageMonitor.js";
 
 const ROOT_ID = "bol-filter-root";
 let initialized = false;
+let host = null;
+let rootObserver = null;
+let hostAttachTimer = null;
+
+const ensureHostAttached = () => {
+  if (!host) return;
+  const body = document.body;
+  if (!body) return;
+  if (!host.isConnected || host.parentElement !== body) {
+    body.appendChild(host);
+  }
+};
+
+const scheduleHostAttach = () => {
+  if (hostAttachTimer) return;
+  hostAttachTimer = window.setTimeout(() => {
+    hostAttachTimer = null;
+    ensureHostAttached();
+  }, 0);
+};
+
+const startRootObserver = () => {
+  if (rootObserver) return;
+  rootObserver = new MutationObserver(() => {
+    scheduleHostAttach();
+  });
+  rootObserver.observe(document.documentElement, { childList: true, subtree: true });
+};
 
 const loadToggleState = async () => {
   const result = await storageGet(TOGGLE_STATE_KEY);
@@ -166,7 +194,7 @@ async function init() {
     existing.remove();
   }
 
-  const host = document.createElement("div");
+  host = document.createElement("div");
   host.id = ROOT_ID;
 
   const shadow = host.attachShadow({ mode: "open" });
@@ -222,7 +250,8 @@ async function init() {
   });
 
   shadow.append(panel.element, floatingButton.element, welcomeOverlay.element);
-  document.body.appendChild(host);
+  ensureHostAttached();
+  startRootObserver();
 
   Object.values(filters).forEach((filter) => filter.observe());
   emptyPageMonitor.observe();
