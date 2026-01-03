@@ -4,6 +4,7 @@ export const SORT_PREFERENCE_KEY = "glazenBolSortPreference";
 export const WELCOME_SEEN_KEY = "glazenBolWelcomeSeen";
 export const PANEL_COLLAPSED_KEY = "glazenBolPanelCollapsed";
 export const BLOCKED_SELLERS_KEY = "glazenBolBlockedSellers";
+export const BLOCKED_BRANDS_KEY = "glazenBolBlockedBrands";
 
 export const SORT_OPTIONS = [
   { value: "", label: "Geen voorkeur" },

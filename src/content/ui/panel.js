@@ -4,6 +4,7 @@ import { EXTENSION_NAME } from "../../shared/constants.js";
 export function createPanel({
   store,
   blockedSellerStore,
+  blockedBrandStore,
   sortOptions = [],
   sortValue = "",
   onSortChange,
@@ -44,7 +45,8 @@ export function createPanel({
   const body = createElement("div", { className: "bf-panel__body" });
   const view = createElement("div", { className: "bf-panel__view" });
   const mainView = createElement("div", { className: "bf-panel__view-panel bf-panel__view-panel--active" });
-  const blockedView = createElement("div", { className: "bf-panel__view-panel" });
+  const blockedSellerView = createElement("div", { className: "bf-panel__view-panel" });
+  const blockedBrandView = createElement("div", { className: "bf-panel__view-panel" });
   const sortSection = createElement("div", { className: "bf-sort" });
   const sortLabel = createElement("label", { className: "bf-sort__label", text: "Standaard sortering" });
   const sortSelect = createElement("select", {
@@ -68,33 +70,67 @@ export function createPanel({
 
   const sectionTitle = createElement("div", { className: "bf-section-title", text: "Filteropties" });
   const togglesList = createElement("div", { className: "bf-toggle-list" });
-  const blockedTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde verkopers" });
-  const blockedManageButton = createElement("button", {
+  const blockedSellerTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde verkopers" });
+  const blockedSellerManageButton = createElement("button", {
     className: "bf-button bf-button--ghost bf-button--block",
     text: "Beheer geblokkeerde verkopers"
   });
-  blockedManageButton.type = "button";
-  const blockedWrap = createElement("div", { className: "bf-blocked" });
-  const blockedList = createElement("div", { className: "bf-blocked__list" });
-  const blockedEmpty = createElement("p", {
+  blockedSellerManageButton.type = "button";
+  const blockedSellerWrap = createElement("div", { className: "bf-blocked" });
+  const blockedSellerList = createElement("div", { className: "bf-blocked__list" });
+  const blockedSellerEmpty = createElement("p", {
     className: "bf-blocked__empty",
     text: "Nog geen verkopers geblokkeerd."
   });
-  const blockedHint = createElement("p", {
+  const blockedSellerHint = createElement("p", {
     className: "bf-blocked__hint",
-    text: "Je kunt een verkoper blokkeren door in de zoekresultaten op de knop Blokkeer naast de verkoper te klikken."
+    text: "Je kunt een verkoper blokkeren door in de zoekresultaten op de knop 'Blokkeer' naast de verkoper te klikken."
   });
-  blockedWrap.append(blockedList, blockedEmpty, blockedHint);
-  mainView.append(sortSection, sectionTitle, togglesList, blockedTitle, blockedManageButton);
+  blockedSellerWrap.append(blockedSellerList, blockedSellerEmpty, blockedSellerHint);
 
-  const blockedHeader = createElement("div", { className: "bf-blocked__header" });
-  const blockedHeaderTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde verkopers" });
-  const backButton = createElement("button", { className: "bf-button bf-button--ghost", text: "Terug" });
-  backButton.type = "button";
-  blockedHeader.append(blockedHeaderTitle, backButton);
-  blockedView.append(blockedHeader, blockedWrap);
+  const blockedBrandTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde merken" });
+  const blockedBrandManageButton = createElement("button", {
+    className: "bf-button bf-button--ghost bf-button--block",
+    text: "Beheer geblokkeerde merken"
+  });
+  blockedBrandManageButton.type = "button";
+  const blockedBrandWrap = createElement("div", { className: "bf-blocked" });
+  const blockedBrandList = createElement("div", { className: "bf-blocked__list" });
+  const blockedBrandEmpty = createElement("p", {
+    className: "bf-blocked__empty",
+    text: "Nog geen merken geblokkeerd."
+  });
+  const blockedBrandHint = createElement("p", {
+    className: "bf-blocked__hint",
+    text: "Je kunt een merk blokkeren door in de zoekresultaten op de knop 'Blokkeer' naast het merk te klikken."
+  });
+  blockedBrandWrap.append(blockedBrandList, blockedBrandEmpty, blockedBrandHint);
 
-  view.append(mainView, blockedView);
+  mainView.append(
+    sortSection,
+    sectionTitle,
+    togglesList,
+    blockedSellerTitle,
+    blockedSellerManageButton,
+    blockedBrandTitle,
+    blockedBrandManageButton
+  );
+
+  const blockedSellerHeader = createElement("div", { className: "bf-blocked__header" });
+  const blockedSellerHeaderTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde verkopers" });
+  const sellerBackButton = createElement("button", { className: "bf-button bf-button--ghost", text: "Terug" });
+  sellerBackButton.type = "button";
+  blockedSellerHeader.append(blockedSellerHeaderTitle, sellerBackButton);
+  blockedSellerView.append(blockedSellerHeader, blockedSellerWrap);
+
+  const blockedBrandHeader = createElement("div", { className: "bf-blocked__header" });
+  const blockedBrandHeaderTitle = createElement("div", { className: "bf-section-title", text: "Geblokkeerde merken" });
+  const brandBackButton = createElement("button", { className: "bf-button bf-button--ghost", text: "Terug" });
+  brandBackButton.type = "button";
+  blockedBrandHeader.append(blockedBrandHeaderTitle, brandBackButton);
+  blockedBrandView.append(blockedBrandHeader, blockedBrandWrap);
+
+  view.append(mainView, blockedSellerView, blockedBrandView);
   body.append(view);
 
   panel.append(header, body);
@@ -150,19 +186,20 @@ export function createPanel({
   };
 
   const unsubscribe = store.subscribe(renderToggles);
-  let unsubscribeBlocked = null;
+  let unsubscribeBlockedSellers = null;
+  let unsubscribeBlockedBrands = null;
 
   const renderBlockedSellers = (snapshot) => {
     const sellers = (snapshot && snapshot.sellers) || [];
-    blockedManageButton.textContent = `Beheer geblokkeerde verkopers (${sellers.length})`;
-    blockedList.innerHTML = "";
+    blockedSellerManageButton.textContent = `Beheer geblokkeerde verkopers (${sellers.length})`;
+    blockedSellerList.innerHTML = "";
     if (!sellers.length) {
-      blockedEmpty.style.display = "block";
-      blockedHint.style.display = "block";
+      blockedSellerEmpty.style.display = "block";
+      blockedSellerHint.style.display = "block";
       return;
     }
-    blockedEmpty.style.display = "none";
-    blockedHint.style.display = "none";
+    blockedSellerEmpty.style.display = "none";
+    blockedSellerHint.style.display = "none";
     sellers.forEach((seller) => {
       const item = createElement("div", { className: "bf-blocked__item" });
       const name = createElement("span", { className: "bf-blocked__name", text: seller });
@@ -174,32 +211,72 @@ export function createPanel({
         }
       });
       item.append(name, button);
-      blockedList.appendChild(item);
+      blockedSellerList.appendChild(item);
     });
   };
 
   if (blockedSellerStore && typeof blockedSellerStore.subscribe === "function") {
-    unsubscribeBlocked = blockedSellerStore.subscribe(renderBlockedSellers);
+    unsubscribeBlockedSellers = blockedSellerStore.subscribe(renderBlockedSellers);
   } else {
     renderBlockedSellers({ sellers: [] });
   }
 
-  const setView = (target) => {
-    const isBlocked = target === "blocked";
-    mainView.classList.toggle("bf-panel__view-panel--active", !isBlocked);
-    blockedView.classList.toggle("bf-panel__view-panel--active", isBlocked);
+  const renderBlockedBrands = (snapshot) => {
+    const brands = (snapshot && snapshot.brands) || [];
+    blockedBrandManageButton.textContent = `Beheer geblokkeerde merken (${brands.length})`;
+    blockedBrandList.innerHTML = "";
+    if (!brands.length) {
+      blockedBrandEmpty.style.display = "block";
+      blockedBrandHint.style.display = "block";
+      return;
+    }
+    blockedBrandEmpty.style.display = "none";
+    blockedBrandHint.style.display = "none";
+    brands.forEach((brand) => {
+      const item = createElement("div", { className: "bf-blocked__item" });
+      const name = createElement("span", { className: "bf-blocked__name", text: brand });
+      const button = createElement("button", { className: "bf-button bf-button--ghost bf-button--small", text: "Ontblokkeer" });
+      button.type = "button";
+      button.addEventListener("click", () => {
+        if (blockedBrandStore && typeof blockedBrandStore.removeBrand === "function") {
+          blockedBrandStore.removeBrand(brand);
+        }
+      });
+      item.append(name, button);
+      blockedBrandList.appendChild(item);
+    });
   };
 
-  blockedManageButton.addEventListener("click", () => setView("blocked"));
-  backButton.addEventListener("click", () => setView("main"));
+  if (blockedBrandStore && typeof blockedBrandStore.subscribe === "function") {
+    unsubscribeBlockedBrands = blockedBrandStore.subscribe(renderBlockedBrands);
+  } else {
+    renderBlockedBrands({ brands: [] });
+  }
+
+  const setView = (target) => {
+    const showMain = target === "main";
+    const showSellers = target === "blocked-sellers";
+    const showBrands = target === "blocked-brands";
+    mainView.classList.toggle("bf-panel__view-panel--active", showMain);
+    blockedSellerView.classList.toggle("bf-panel__view-panel--active", showSellers);
+    blockedBrandView.classList.toggle("bf-panel__view-panel--active", showBrands);
+  };
+
+  blockedSellerManageButton.addEventListener("click", () => setView("blocked-sellers"));
+  sellerBackButton.addEventListener("click", () => setView("main"));
+  blockedBrandManageButton.addEventListener("click", () => setView("blocked-brands"));
+  brandBackButton.addEventListener("click", () => setView("main"));
 
   return {
     element: panel,
     setVisible,
     destroy: () => {
       unsubscribe();
-      if (unsubscribeBlocked) {
-        unsubscribeBlocked();
+      if (unsubscribeBlockedSellers) {
+        unsubscribeBlockedSellers();
+      }
+      if (unsubscribeBlockedBrands) {
+        unsubscribeBlockedBrands();
       }
       panel.remove();
     }

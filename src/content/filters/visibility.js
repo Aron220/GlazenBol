@@ -4,6 +4,7 @@ export const GENERAL_AD_HIDDEN_ATTR = "data-bolfilter-hidden-general-ad";
 export const VERKOOP_DOOR_BOL_HIDDEN_ATTR = "data-bolfilter-hidden-verkoop-door-bol";
 export const GOEDE_KEUZE_HIDDEN_ATTR = "data-bolfilter-hidden-goede-keuze";
 export const SELLER_BLOCK_HIDDEN_ATTR = "data-bolfilter-hidden-seller-block";
+export const BRAND_BLOCK_HIDDEN_ATTR = "data-bolfilter-hidden-brand-block";
 
 const ALL_MARKERS = [
   MERKLOOS_HIDDEN_ATTR,
@@ -11,7 +12,8 @@ const ALL_MARKERS = [
   GENERAL_AD_HIDDEN_ATTR,
   VERKOOP_DOOR_BOL_HIDDEN_ATTR,
   GOEDE_KEUZE_HIDDEN_ATTR,
-  SELLER_BLOCK_HIDDEN_ATTR
+  SELLER_BLOCK_HIDDEN_ATTR,
+  BRAND_BLOCK_HIDDEN_ATTR
 ];
 
 function applyVisibility(listingEl) {
