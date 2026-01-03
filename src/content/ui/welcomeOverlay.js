@@ -59,7 +59,16 @@ export function createWelcomeOverlay() {
   const show = () => {
     overlay.classList.add("bf-welcome--visible");
     overlay.setAttribute("aria-hidden", "false");
-    closeButton.focus();
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    try {
+      closeButton.focus({ preventScroll: true });
+    } catch (error) {
+      closeButton.focus();
+    }
+    if (window.scrollX !== scrollX || window.scrollY !== scrollY) {
+      window.scrollTo(scrollX, scrollY);
+    }
   };
 
   overlay.addEventListener("click", (event) => {
