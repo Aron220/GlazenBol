@@ -5,6 +5,23 @@ const DEFAULT_TIMEOUT_MS = 5000;
 
 let hideTimer = null;
 
+export function hideEmptyPageToast({ root } = {}) {
+  const container = root || document.body;
+  const toast = container.querySelector(`#${TOAST_ID}`);
+  if (!toast) return;
+
+  toast.classList.remove("visible");
+
+  if (hideTimer) {
+    window.clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+
+  window.setTimeout(() => {
+    toast.remove();
+  }, 240);
+}
+
 export function showEmptyPageToast({ root, message, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   if (!message) return;
 

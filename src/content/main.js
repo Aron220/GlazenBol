@@ -255,7 +255,7 @@ async function init() {
 
   Object.values(filters).forEach((filter) => filter.observe());
   emptyPageMonitor.observe();
-  emptyPageMonitor.scheduleCheck({ delayMs: 300 });
+  emptyPageMonitor.scheduleCheck({ delayMs: 500 });
 
   store.subscribe((list) => {
     list.forEach((toggle) => {

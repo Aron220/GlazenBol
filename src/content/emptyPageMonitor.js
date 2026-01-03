@@ -7,12 +7,12 @@ import {
   SELLER_BLOCK_HIDDEN_ATTR,
   BRAND_BLOCK_HIDDEN_ATTR
 } from "./filters/visibility.js";
-import { showEmptyPageToast } from "./ui/emptyPageToast.js";
+import { hideEmptyPageToast, showEmptyPageToast } from "./ui/emptyPageToast.js";
 
 const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"], a[href*="/p/"]';
 const LISTING_ROOT_SELECTOR =
   '[data-bltgi*="ProductList"], [data-bltgh*="ProductList"], [data-test*="product"], [role="listitem"], article, li';
-const DEFAULT_CHECK_DELAY_MS = 1000;
+const DEFAULT_CHECK_DELAY_MS = 500;
 const HIDDEN_ATTRS = [
   MERKLOOS_HIDDEN_ATTR,
   SPONSORED_HIDDEN_ATTR,
@@ -22,6 +22,8 @@ const HIDDEN_ATTRS = [
   SELLER_BLOCK_HIDDEN_ATTR,
   BRAND_BLOCK_HIDDEN_ATTR
 ];
+
+let lastToastMessage = null;
 
 function findListingRoot(startEl) {
   const prefer = startEl.closest(LISTING_ROOT_SELECTOR);
@@ -75,41 +77,46 @@ function checkForEmptyPage({ root }) {
   const listings = getListingRoots().filter((listing) =>
     Boolean(listing.querySelector && listing.querySelector(PRODUCT_LINK_SELECTOR))
   );
-  if (!listings.length) return;
+  let message = null;
+  if (!listings.length) {
+    message = "Geen resultaten gevonden.";
+  } else {
+    const visibleListings = listings.filter((listing) => !isHidden(listing));
+    const hiddenCount = listings.length - visibleListings.length;
 
-  const visibleListings = listings.filter((listing) => !isHidden(listing));
-  const hiddenCount = listings.length - visibleListings.length;
+    if (visibleListings.length === 0) {
+      message =
+        hiddenCount > 0
+          ? "Geen resultaten! Met de huidige filters staan er op deze pagina geen producten. Pas je filters aan of ga verder."
+          : "Geen resultaten gevonden.";
+    } else if (visibleListings.length < 5) {
+      const remaining = visibleListings.length;
+      const resultLabel = remaining === 1 ? "resultaat" : "resultaten";
+      message =
+        hiddenCount > 0
+          ? `Nog ${remaining} ${resultLabel} over (${hiddenCount} ${
+              hiddenCount === 1 ? "product" : "producten"
+            } verborgen).`
+          : `Nog ${remaining} ${resultLabel} over.`;
+    }
+  }
 
-  if (hiddenCount === 0) return;
-
-  if (visibleListings.length === 0) {
-    showEmptyPageToast({
-      root,
-      message: "Geen resultaten! Met de huidige filters staan er op deze pagina geen producten. Pas je filters aan of ga verder."
-    });
+  if (!message) {
+    lastToastMessage = null;
+    hideEmptyPageToast({ root });
     return;
   }
 
-  if (visibleListings.length < 5) {
-    const remaining = visibleListings.length;
-    const hidden = hiddenCount;
-    const resultLabel = remaining === 1 ? "resultaat" : "resultaten";
-    const hiddenLabel = hidden === 1 ? "product" : "producten";
-    showEmptyPageToast({
-      root,
-      message: `Nog ${remaining} ${resultLabel} over (${hidden} ${hiddenLabel} verborgen).`
-    });
-  }
+  if (message === lastToastMessage) return;
+  lastToastMessage = message;
+  showEmptyPageToast({ root, message });
 }
 
 export function createEmptyPageMonitor({ root } = {}) {
   let checkTimer = null;
 
   const scheduleCheck = ({ delayMs = DEFAULT_CHECK_DELAY_MS } = {}) => {
-    if (checkTimer) {
-      window.clearTimeout(checkTimer);
-      checkTimer = null;
-    }
+    if (checkTimer) return;
 
     checkTimer = window.setTimeout(() => {
       checkTimer = null;
