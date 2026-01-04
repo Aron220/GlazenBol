@@ -4,8 +4,8 @@ Browser extension scaffold for bol.com that injects a collapsible control panel 
 
 ## Structure
 
-- `manifest.json` — Chrome MV3 manifest wired to bol.com.
-- `src/background/index.js` — background service worker placeholder.
+- `manifest.json` — Firefox MV2 manifest wired to bol.com.
+- `src/background/index.js` — background script placeholder.
 - `src/content/loader.js` — light content script that lazy-loads the real app.
 - `src/content/main.js` — bootstraps the injected UI inside a shadow root.
 - `src/content/filters/` — DOM filtering logic (e.g., merkloos brand filter).
@@ -17,8 +17,8 @@ Browser extension scaffold for bol.com that injects a collapsible control panel 
 
 ## Running
 
-1) In Chrome/Edge, open `chrome://extensions` and enable **Developer mode**.  
-2) Click **Load unpacked** and select this project folder (it must contain `manifest.json`).  
+1) In Firefox, open `about:debugging#/runtime/this-firefox` and click **Load Temporary Add-on**.  
+2) Select this project folder (it must contain `manifest.json`).  
 3) Visit bol.com and you should see the panel anchored at bottom-right. Collapse it to reveal the floating button.
 
 ## Next steps
@@ -27,4 +27,4 @@ Browser extension scaffold for bol.com that injects a collapsible control panel 
 - Persist toggle state with `chrome.storage.sync`.
 - Add icons and polish copy as product direction settles.
 
-Note: manifest is MV2 for Firefox temporary installs; upgrade to MV3 when targeting Chromium-only.
+Note: manifest is MV2 for Firefox. Use MV3 when targeting Chromium-only.
