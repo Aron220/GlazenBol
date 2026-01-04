@@ -6,6 +6,8 @@ export function createWelcomeOverlay() {
     className: "bf-welcome",
     attrs: { role: "dialog", "aria-modal": "true", "aria-hidden": "true" }
   });
+  overlay.style.opacity = "0";
+  overlay.style.pointerEvents = "none";
 
   const card = createElement("div", { className: "bf-welcome__card" });
   const header = createElement("div", { className: "bf-welcome__header" });
@@ -54,9 +56,13 @@ export function createWelcomeOverlay() {
   const hide = () => {
     overlay.classList.remove("bf-welcome--visible");
     overlay.setAttribute("aria-hidden", "true");
+    overlay.style.opacity = "0";
+    overlay.style.pointerEvents = "none";
   };
 
   const show = () => {
+    overlay.style.opacity = "";
+    overlay.style.pointerEvents = "";
     overlay.classList.add("bf-welcome--visible");
     overlay.setAttribute("aria-hidden", "false");
     const scrollX = window.scrollX;
