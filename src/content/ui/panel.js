@@ -270,7 +270,7 @@ export function createPanel({
     sellers.forEach((seller) => {
       const item = createElement("div", { className: "bf-blocked__item" });
       const name = createElement("span", { className: "bf-blocked__name", text: seller });
-      const button = createElement("button", { className: "bf-button bf-button--ghost bf-button--small", text: "Ontblokkeer" });
+      const button = createElement("button", { className: "bf-button bf-button--ghost bf-button--small", text: "Deblokkeer" });
       button.type = "button";
       button.addEventListener("click", () => {
         if (blockedSellerStore && typeof blockedSellerStore.removeSeller === "function") {
@@ -302,7 +302,7 @@ export function createPanel({
     brands.forEach((brand) => {
       const item = createElement("div", { className: "bf-blocked__item" });
       const name = createElement("span", { className: "bf-blocked__name", text: brand });
-      const button = createElement("button", { className: "bf-button bf-button--ghost bf-button--small", text: "Ontblokkeer" });
+      const button = createElement("button", { className: "bf-button bf-button--ghost bf-button--small", text: "Deblokkeer" });
       button.type = "button";
       button.addEventListener("click", () => {
         if (blockedBrandStore && typeof blockedBrandStore.removeBrand === "function") {
