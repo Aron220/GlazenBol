@@ -185,6 +185,15 @@ export function createPanel({
 
   panel.append(header, body, footer);
 
+  const createSvgElement = (svgString) => {
+    if (!svgString) return null;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, "image/svg+xml");
+    const svg = doc.documentElement;
+    if (!svg || svg.nodeName.toLowerCase() !== "svg") return null;
+    return document.importNode(svg, true);
+  };
+
   const renderToggle = (toggle) => {
     const item = createElement("label", { className: "bf-toggle" });
     const main = createElement("div", { className: "bf-toggle__main" });
@@ -211,7 +220,10 @@ export function createPanel({
           "aria-label": toggle.badgeAlt || ""
         }
       });
-      badge.innerHTML = toggle.badgeSvg;
+      const badgeSvg = createSvgElement(toggle.badgeSvg);
+      if (badgeSvg) {
+        badge.appendChild(badgeSvg);
+      }
       name.appendChild(badge);
     }
 
@@ -243,7 +255,9 @@ export function createPanel({
   };
 
   const renderToggles = (list) => {
-    togglesList.innerHTML = "";
+    while (togglesList.firstChild) {
+      togglesList.removeChild(togglesList.firstChild);
+    }
     list.forEach((toggle) => togglesList.appendChild(renderToggle(toggle)));
   };
 
