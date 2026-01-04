@@ -18,6 +18,11 @@
     "scripts": ["src/background/index.js"],
     "persistent": false
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "glazenbol@glazenbol.dev"
+    }
+  },
   "permissions": [
     "storage",
     "https://www.bol.com/*"
