@@ -2,6 +2,7 @@ import { MERKLOOS_HIDDEN_ATTR, markHidden, unmarkHidden } from "./visibility.js"
 
 const BRAND_LINK_SELECTOR = 'a[href*="/b/"]';
 const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"]';
+const LISTING_DATA_SELECTOR = '[data-bltgi*="ProductList"], [data-bltgh*="ProductList"]';
 
 function normalizeText(text) {
   return (text || "").trim().toLowerCase();
@@ -15,22 +16,35 @@ function isMerkloos(text) {
 function findListingRoot(startEl) {
   // Try obvious container types first.
   const prefer =
-    startEl.closest('[data-bltgi*="ProductList"]') ||
+    startEl.closest(LISTING_DATA_SELECTOR) ||
     startEl.closest('[data-test*="product"]') ||
+    startEl.closest('[role="listitem"]') ||
     startEl.closest("article") ||
     startEl.closest("li");
-  if (prefer && prefer.querySelector(PRODUCT_LINK_SELECTOR)) return prefer;
+  if (prefer && prefer !== document.body) {
+    const dataRoot = prefer.closest('[data-bltgi*="ProductList"]');
+    const resolved = dataRoot && dataRoot !== document.body ? dataRoot : prefer;
+    if (resolved.querySelector(PRODUCT_LINK_SELECTOR)) return resolved;
+  }
 
-  // Walk up and choose the highest ancestor that still contains the product link.
+  // Walk up and keep the closest ancestor that looks like a single product card.
   let node = startEl;
   let candidate = null;
+  let firstWithProductLink = null;
   while (node && node !== document.body) {
     if (node.querySelector(PRODUCT_LINK_SELECTOR)) {
-      candidate = node;
+      if (!firstWithProductLink) firstWithProductLink = node;
+      const linkCount = node.querySelectorAll(PRODUCT_LINK_SELECTOR).length;
+      if (linkCount <= 2) {
+        candidate = node;
+      } else if (candidate) {
+        break;
+      }
     }
     node = node.parentElement;
   }
-  return candidate;
+  const resolved = candidate || firstWithProductLink;
+  return resolved && resolved !== document.body ? resolved : null;
 }
 
 function getBrandText(listingEl) {
@@ -40,10 +54,12 @@ function getBrandText(listingEl) {
 }
 
 function hideListing(listingEl) {
+  if (listingEl === document.body || listingEl === document.documentElement) return;
   markHidden(listingEl, MERKLOOS_HIDDEN_ATTR);
 }
 
 function showListing(listingEl) {
+  if (listingEl === document.body || listingEl === document.documentElement) return;
   unmarkHidden(listingEl, MERKLOOS_HIDDEN_ATTR);
 }
 
