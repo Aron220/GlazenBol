@@ -2,6 +2,7 @@ export const EXTENSION_NAME = "GlazenBol";
 export const TOGGLE_STATE_KEY = "glazenBolToggleState";
 export const SORT_PREFERENCE_KEY = "glazenBolSortPreference";
 export const WELCOME_SEEN_KEY = "glazenBolWelcomeSeen";
+export const UPDATE_SEEN_VERSION_KEY = "glazenBolUpdateSeenVersion";
 export const PANEL_COLLAPSED_KEY = "glazenBolPanelCollapsed";
 export const BLOCKED_SELLERS_KEY = "glazenBolBlockedSellers";
 export const BLOCKED_BRANDS_KEY = "glazenBolBlockedBrands";

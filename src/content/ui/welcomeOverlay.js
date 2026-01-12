@@ -1,7 +1,7 @@
 import { createElement } from "../utils/dom.js";
 import { EXTENSION_NAME } from "../../shared/constants.js";
 
-export function createWelcomeOverlay() {
+const createInfoOverlay = ({ eyebrowText, titleText, introText, steps, noteText, hintText, buttonText }) => {
   const overlay = createElement("div", {
     className: "bf-welcome",
     attrs: { role: "dialog", "aria-modal": "true", "aria-hidden": "true" }
@@ -18,39 +18,57 @@ export function createWelcomeOverlay() {
       alt: "GlazenBol"
     }
   });
-  const eyebrow = createElement("span", { className: "bf-welcome__eyebrow", text: `Welkom bij ${EXTENSION_NAME}` });
-  const title = createElement("h2", { className: "bf-welcome__title", text: "Fijn dat je er bent!" });
+  const eyebrow = createElement("span", { className: "bf-welcome__eyebrow", text: eyebrowText });
+  const title = createElement("h2", { className: "bf-welcome__title", text: titleText });
   const intro = createElement("p", {
     className: "bf-welcome__intro",
-    text: "Met deze extensie houd je bol.com overzichtelijk en gefocust."
+    text: introText
   });
   header.append(logo, eyebrow, title, intro);
 
-  const steps = createElement("ol", { className: "bf-welcome__steps" });
-  const stepItems = [
-    "Open het paneel rechtsonder (GlazenBol-knop) als je het niet ziet.",
-    "Kies een standaard sortering zodat elke pagina direct goed staat.",
-    "Schakel filters in of uit om resultaten te schonen.",
-    "Klik op het pijltje om het paneel te minimaliseren."
-  ];
-  stepItems.forEach((step) => {
-    steps.appendChild(createElement("li", { text: step }));
-  });
+  let stepsElement = null;
+  if (Array.isArray(steps) && steps.length > 0) {
+    stepsElement = createElement("ol", { className: "bf-welcome__steps" });
+    steps.forEach((step) => {
+      stepsElement.appendChild(createElement("li", { text: step }));
+    });
+  }
 
-  const hint = createElement("p", {
-    className: "bf-welcome__hint",
-    text: "Later nog eens lezen? Gebruik de ?-knop in het paneel."
-  });
+  let note = null;
+  if (noteText) {
+    note = createElement("p", {
+      className: "bf-welcome__hint",
+      text: noteText
+    });
+  }
+
+  let hint = null;
+  if (hintText) {
+    hint = createElement("p", {
+      className: "bf-welcome__hint",
+      text: hintText
+    });
+  }
 
   const footer = createElement("div", { className: "bf-welcome__footer" });
   const closeButton = createElement("button", {
     className: "bf-button bf-button--primary",
-    text: "Aan de slag"
+    text: buttonText
   });
   closeButton.type = "button";
   footer.appendChild(closeButton);
 
-  card.append(header, steps, hint, footer);
+  card.append(header);
+  if (stepsElement) {
+    card.appendChild(stepsElement);
+  }
+  if (note) {
+    card.appendChild(note);
+  }
+  if (hint) {
+    card.appendChild(hint);
+  }
+  card.appendChild(footer);
   overlay.appendChild(card);
 
   const hide = () => {
@@ -102,4 +120,33 @@ export function createWelcomeOverlay() {
       overlay.remove();
     }
   };
+};
+
+export function createWelcomeOverlay() {
+  return createInfoOverlay({
+    eyebrowText: `Welkom bij ${EXTENSION_NAME}`,
+    titleText: "Fijn dat je er bent!",
+    introText: "Met deze extensie houd je bol.com overzichtelijk en gefocust.",
+    steps: [
+      "Open het paneel rechtsonder (GlazenBol-knop) als je het niet ziet.",
+      "Kies een standaard sortering zodat elke pagina direct goed staat.",
+      "Schakel filters in of uit om resultaten te schonen.",
+      "Klik op het pijltje om het paneel te minimaliseren."
+    ],
+    hintText: "Later nog eens lezen? Gebruik de ?-knop in het paneel.",
+    buttonText: "Aan de slag"
+  });
+}
+
+export function createUpdateOverlay({ version, highlights }) {
+  const titleSuffix = version ? ` (${version})` : "";
+  return createInfoOverlay({
+    eyebrowText: "Nieuwe update",
+    titleText: `Wat is er nieuw?${titleSuffix}`,
+    introText: "GlazenBol is bijgewerkt met verbeteringen en fixes.",
+    steps: highlights,
+    noteText: "Jullie support en feedback maken dit extra leuk, dankjewel!",
+    hintText: "Vragen? Klik op de ?-knop in het paneel.",
+    buttonText: "Top, bedankt"
+  });
 }

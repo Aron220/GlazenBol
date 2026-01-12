@@ -1,6 +1,6 @@
 import { createPanel } from "./ui/panel.js";
 import { createFloatingButton } from "./ui/floatingButton.js";
-import { createWelcomeOverlay } from "./ui/welcomeOverlay.js";
+import { createWelcomeOverlay, createUpdateOverlay } from "./ui/welcomeOverlay.js";
 import { createToggleStore } from "./state/toggleState.js";
 import { createBlockedSellerStore } from "./state/blockedSellerState.js";
 import { createBlockedBrandStore } from "./state/blockedBrandState.js";
@@ -15,6 +15,7 @@ import {
   SORT_OPTIONS,
   SORT_PREFERENCE_KEY,
   TOGGLE_STATE_KEY,
+  UPDATE_SEEN_VERSION_KEY,
   WELCOME_SEEN_KEY
 } from "../shared/constants.js";
 import { createMerkloosFilter } from "./filters/merkloosFilter.js";
@@ -111,11 +112,19 @@ const persistWelcomeSeen = () => storageSet({ [WELCOME_SEEN_KEY]: true });
 const persistPanelCollapsed = (isCollapsed) => storageSet({ [PANEL_COLLAPSED_KEY]: Boolean(isCollapsed) });
 const persistBlockedSellers = (sellers) => storageSet({ [BLOCKED_SELLERS_KEY]: sellers });
 const persistBlockedBrands = (brands) => storageSet({ [BLOCKED_BRANDS_KEY]: brands });
+const persistUpdateSeenVersion = (version) => storageSet({ [UPDATE_SEEN_VERSION_KEY]: version });
 
 const loadWelcomeSeen = async () => {
   const result = await storageGet(WELCOME_SEEN_KEY);
   if (!result || typeof result !== "object") return false;
   return Boolean(result[WELCOME_SEEN_KEY]);
+};
+
+const loadUpdateSeenVersion = async () => {
+  const result = await storageGet(UPDATE_SEEN_VERSION_KEY);
+  if (!result || typeof result !== "object") return "";
+  const version = result[UPDATE_SEEN_VERSION_KEY];
+  return typeof version === "string" ? version : "";
 };
 
 const loadPanelCollapsed = async () => {
@@ -185,6 +194,20 @@ const scheduleSortPreference = (preference) => {
   attempt();
 };
 
+const getExtensionVersion = () => {
+  try {
+    if (chrome && chrome.runtime && typeof chrome.runtime.getManifest === "function") {
+      const manifest = chrome.runtime.getManifest();
+      if (manifest && typeof manifest.version === "string") {
+        return manifest.version;
+      }
+    }
+  } catch (error) {
+    return "";
+  }
+  return "";
+};
+
 async function init() {
   if (initialized) return;
   initialized = true;
@@ -203,11 +226,21 @@ async function init() {
   startRootObserver();
 
   const welcomeOverlay = createWelcomeOverlay();
+  const currentVersion = getExtensionVersion();
+  const updateHighlights = [
+    "Ondersteuning voor Firefox op Android.",
+    "Paneel verschijnt nu stabieler zonder flits.",
+    "Geen lege pagina meer na het openen van menu's.",
+    "Gesponsorde producten worden nu ook op productpagina's verborgen.",
+    "Vraagteken-iconen zijn netjes uitgelijnd."
+  ];
+  const updateOverlay = createUpdateOverlay({ version: currentVersion, highlights: updateHighlights });
   const persistedToggles = await loadToggleState();
   const persistedSortPreference = normalizeSortPreference(await loadSortPreference());
   const persistedBlockedSellers = await loadBlockedSellers();
   const persistedBlockedBrands = await loadBlockedBrands();
   const welcomeSeen = await loadWelcomeSeen();
+  const updateSeenVersion = await loadUpdateSeenVersion();
   const persistedPanelCollapsed = await loadPanelCollapsed();
   await stylesheetReady;
   const store = createToggleStore(mergeToggles(DEFAULT_TOGGLES, persistedToggles));
@@ -253,7 +286,13 @@ async function init() {
   });
 
   setCollapsed(persistedPanelCollapsed, { persist: false });
-  shadow.append(panel.element, panel.tooltipElement, floatingButton.element, welcomeOverlay.element);
+  shadow.append(
+    panel.element,
+    panel.tooltipElement,
+    floatingButton.element,
+    welcomeOverlay.element,
+    updateOverlay.element
+  );
 
   Object.values(filters).forEach((filter) => filter.observe());
   emptyPageMonitor.observe();
@@ -284,7 +323,13 @@ async function init() {
 
   if (!welcomeSeen) {
     void persistWelcomeSeen();
+    if (currentVersion) {
+      void persistUpdateSeenVersion(currentVersion);
+    }
     welcomeOverlay.show();
+  } else if (currentVersion && updateSeenVersion !== currentVersion) {
+    void persistUpdateSeenVersion(currentVersion);
+    updateOverlay.show();
   }
 }
 
