@@ -198,7 +198,9 @@ async function init() {
   host.id = ROOT_ID;
 
   const shadow = host.attachShadow({ mode: "open" });
-  injectStylesheet(shadow, chrome.runtime.getURL("src/content/styles/panel.css"));
+  const stylesheetReady = injectStylesheet(shadow, chrome.runtime.getURL("src/content/styles/panel.css"));
+  ensureHostAttached();
+  startRootObserver();
 
   const welcomeOverlay = createWelcomeOverlay();
   const persistedToggles = await loadToggleState();
@@ -207,6 +209,7 @@ async function init() {
   const persistedBlockedBrands = await loadBlockedBrands();
   const welcomeSeen = await loadWelcomeSeen();
   const persistedPanelCollapsed = await loadPanelCollapsed();
+  await stylesheetReady;
   const store = createToggleStore(mergeToggles(DEFAULT_TOGGLES, persistedToggles));
   const blockedSellerStore = createBlockedSellerStore(persistedBlockedSellers);
   const blockedBrandStore = createBlockedBrandStore(persistedBlockedBrands);
@@ -249,9 +252,8 @@ async function init() {
     onExpand: () => setCollapsed(false)
   });
 
+  setCollapsed(persistedPanelCollapsed, { persist: false });
   shadow.append(panel.element, panel.tooltipElement, floatingButton.element, welcomeOverlay.element);
-  ensureHostAttached();
-  startRootObserver();
 
   Object.values(filters).forEach((filter) => filter.observe());
   emptyPageMonitor.observe();
@@ -279,7 +281,6 @@ async function init() {
   });
 
   scheduleSortPreference(persistedSortPreference);
-  setCollapsed(persistedPanelCollapsed, { persist: false });
 
   if (!welcomeSeen) {
     void persistWelcomeSeen();

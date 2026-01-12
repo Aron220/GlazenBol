@@ -12,8 +12,12 @@ export function createElement(tag, options = {}) {
 }
 
 export function injectStylesheet(shadowRoot, href) {
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = href;
-  shadowRoot.appendChild(link);
+  return new Promise((resolve) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.addEventListener("load", () => resolve(true), { once: true });
+    link.addEventListener("error", () => resolve(false), { once: true });
+    shadowRoot.appendChild(link);
+  });
 }
