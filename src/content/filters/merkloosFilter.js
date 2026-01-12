@@ -67,6 +67,7 @@ export function createMerkloosFilter() {
   let enabled = true;
 
   const scan = () => {
+    const hiddenListings = new Set();
     const productLinks = document.querySelectorAll(PRODUCT_LINK_SELECTOR);
     productLinks.forEach((productLink) => {
       const listing = findListingRoot(productLink);
@@ -74,8 +75,15 @@ export function createMerkloosFilter() {
       const brandText = getBrandText(listing);
       const shouldHide = enabled && isMerkloos(brandText);
       if (shouldHide) {
+        hiddenListings.add(listing);
         hideListing(listing);
       } else {
+        showListing(listing);
+      }
+    });
+
+    document.querySelectorAll(`[${MERKLOOS_HIDDEN_ATTR}="true"]`).forEach((listing) => {
+      if (!enabled || !hiddenListings.has(listing)) {
         showListing(listing);
       }
     });
