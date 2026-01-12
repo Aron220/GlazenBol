@@ -4,6 +4,8 @@ const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"]';
 const SPONSORED_KEYWORDS = ["gesponsord", "gesponsorde", "sponsored"];
 const SPONSORED_BADGE_SELECTOR = "span.text-12.text-neutral-text-medium";
 const SPONSORED_ICON_SELECTOR = 'svg[data-testid="advertisement-disclaimer-icon"]';
+const PDP_SPONSORED_ITEM_SELECTOR = ".js_sponsored-products_item";
+const PDP_SPONSORED_LABEL_SELECTOR = ".dsa__label__text, button.dsa__label";
 
 function normalizeText(text) {
   return (text || "").trim().toLowerCase();
@@ -70,6 +72,28 @@ export function createGesponsordFilter() {
       const container = badge.parentElement || badge;
       if (!container.querySelector(SPONSORED_ICON_SELECTOR)) return;
       const listing = findListingRoot(badge);
+      if (!listing) return;
+      sponsoredListings.add(listing);
+      if (enabled) {
+        hideListing(listing);
+      }
+    });
+
+    const pdpSponsoredItems = document.querySelectorAll(PDP_SPONSORED_ITEM_SELECTOR);
+    pdpSponsoredItems.forEach((item) => {
+      const listing = item.matches("li, article, [role='listitem']") ? item : findListingRoot(item);
+      if (!listing) return;
+      sponsoredListings.add(listing);
+      if (enabled) {
+        hideListing(listing);
+      }
+    });
+
+    const pdpSponsoredLabels = document.querySelectorAll(PDP_SPONSORED_LABEL_SELECTOR);
+    pdpSponsoredLabels.forEach((label) => {
+      const text = normalizeText(label.textContent);
+      if (!SPONSORED_KEYWORDS.some((kw) => text.includes(kw))) return;
+      const listing = findListingRoot(label);
       if (!listing) return;
       sponsoredListings.add(listing);
       if (enabled) {
