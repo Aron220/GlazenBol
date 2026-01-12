@@ -17,15 +17,22 @@
     "128": "images/icon-128.png"
   },
   "background": {
-    "scripts": ["src/background/index.js"],
+    "scripts": [
+      "src/background/index.js"
+    ],
     "persistent": false
   },
   "browser_specific_settings": {
     "gecko": {
       "id": "glazenbol@glazenbol.dev",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
+    },
+    "gecko_android": {
+      "id": "glazenbol@glazenbol.dev"
     }
   },
   "permissions": [
