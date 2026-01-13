@@ -28,17 +28,58 @@ import { createBrandBlockFilter } from "./filters/brandBlockFilter.js";
 import { createEmptyPageMonitor } from "./emptyPageMonitor.js";
 
 const ROOT_ID = "bol-filter-root";
+const GLOBAL_INIT_KEY = "__glazenbolContentInit";
 let initialized = false;
 let host = null;
 let rootObserver = null;
 let hostAttachTimer = null;
+let syncCollapsedState = null;
+let currentCollapsed = false;
+let uiReady = false;
 
-const ensureHostAttached = () => {
+const hasReactRootFlag = (node) => {
+  if (!node) return false;
+  return Object.getOwnPropertyNames(node).some((key) => key.startsWith("__reactFiber$") || key.startsWith("__reactContainer$"));
+};
+
+const waitForHydration = async () => {
+  const maxAttempts = 20;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    if (hasReactRootFlag(document.documentElement) || hasReactRootFlag(document.body)) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
+};
+
+const revealHost = () => {
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      if (!host) return;
+      host.setAttribute("data-bf-ready", "true");
+      host.style.visibility = "visible";
+      host.style.pointerEvents = "";
+    });
+  });
+};
+
+const ensureHostAttached = ({ forceReveal = false } = {}) => {
   if (!host) return;
-  const body = document.body;
-  if (!body) return;
-  if (!host.isConnected || host.parentElement !== body) {
-    body.appendChild(host);
+  const parent = document.body || document.documentElement;
+  if (!parent) return;
+  const needsAttach = !host.isConnected || host.parentElement !== parent;
+  if (needsAttach) {
+    host.setAttribute("data-bf-ready", "false");
+    host.style.visibility = "hidden";
+    host.style.pointerEvents = "none";
+    parent.appendChild(host);
+  }
+  if (uiReady && typeof syncCollapsedState === "function" && needsAttach) {
+    syncCollapsedState();
+  }
+  if (uiReady && (needsAttach || forceReveal)) {
+    revealHost();
   }
 };
 
@@ -210,7 +251,13 @@ const getExtensionVersion = () => {
 
 async function init() {
   if (initialized) return;
+  if (window[GLOBAL_INIT_KEY]) {
+    return;
+  }
+  window[GLOBAL_INIT_KEY] = true;
   initialized = true;
+
+  await waitForHydration();
 
   const existing = document.getElementById(ROOT_ID);
   if (existing) {
@@ -219,6 +266,9 @@ async function init() {
 
   host = document.createElement("div");
   host.id = ROOT_ID;
+  host.setAttribute("data-bf-ready", "false");
+  host.style.visibility = "hidden";
+  host.style.pointerEvents = "none";
 
   const shadow = host.attachShadow({ mode: "open" });
   const stylesheetReady = injectStylesheet(shadow, chrome.runtime.getURL("src/content/styles/panel.css"));
@@ -258,12 +308,16 @@ async function init() {
   const emptyPageMonitor = createEmptyPageMonitor({ root: shadow });
 
   const setCollapsed = (isCollapsed, { persist = true } = {}) => {
-    panel.setVisible(!isCollapsed);
-    floatingButton.setVisible(isCollapsed);
+    const collapsed = Boolean(isCollapsed);
+    currentCollapsed = collapsed;
+    panel.setVisible(!collapsed);
+    floatingButton.setVisible(collapsed);
     if (persist) {
-      void persistPanelCollapsed(isCollapsed);
+      void persistPanelCollapsed(collapsed);
     }
   };
+
+  syncCollapsedState = () => setCollapsed(currentCollapsed, { persist: false });
 
   const panel = createPanel({
     store,
@@ -293,6 +347,8 @@ async function init() {
     welcomeOverlay.element,
     updateOverlay.element
   );
+  uiReady = true;
+  ensureHostAttached({ forceReveal: true });
 
   Object.values(filters).forEach((filter) => filter.observe());
   emptyPageMonitor.observe();

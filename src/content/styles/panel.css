@@ -3,6 +3,14 @@
   font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
 
+:host([data-bf-ready="false"]) .bf-panel,
+:host([data-bf-ready="false"]) .bf-floating-button {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: none;
+}
+
 .bf-panel {
   position: fixed;
   bottom: 1.5rem;
