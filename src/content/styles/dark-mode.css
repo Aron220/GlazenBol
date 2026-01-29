@@ -44,6 +44,29 @@ html.bf-dark-mode div[class*="bg-neutral-background-input"] {
   border-color: #444 !important;
 }
 
+/* Quick category buttons and similar input-styled buttons */
+html.bf-dark-mode button[class*="bg-neutral-background-input"] {
+  background-color: #2b2b2b !important;
+  border-color: #444 !important;
+  color: #e6e6e6 !important;
+}
+
+html.bf-dark-mode button[class*="bg-neutral-background-input"]:hover,
+html.bf-dark-mode button[class*="bg-neutral-background-input"]:focus-visible {
+  background-color: #333 !important;
+  border-color: #666 !important;
+  color: #ffffff !important;
+}
+
+html.bf-dark-mode button[class*="bg-neutral-background-input"]:active {
+  background-color: #262626 !important;
+  border-color: #555 !important;
+}
+
+html.bf-dark-mode button[class*="bg-neutral-background-input"] span {
+  color: inherit !important;
+}
+
 /* Common Bol.com background utility classes overrides (best guess, generic) */
 html.bf-dark-mode [class*="bg-white"] {
   background-color: #1e1e1e !important;
