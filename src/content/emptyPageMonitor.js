@@ -27,6 +27,10 @@ const HIDDEN_ATTRS = [
 
 let lastToastMessage = null;
 
+function isProductDetailPage() {
+  return window.location.pathname.toLowerCase().includes("/p/");
+}
+
 function getListingRoots() {
   const listings = new Set();
 
@@ -75,6 +79,12 @@ function isHidden(listingEl) {
 }
 
 function checkForEmptyPage({ root }) {
+  if (isProductDetailPage()) {
+    lastToastMessage = null;
+    hideEmptyPageToast({ root });
+    return;
+  }
+
   const listings = getListingRoots().filter((listing) =>
     Boolean(listing.querySelector && listing.querySelector(PRODUCT_LINK_SELECTOR))
   );
@@ -143,4 +153,3 @@ export function createEmptyPageMonitor({ root } = {}) {
     destroy
   };
 }
-
