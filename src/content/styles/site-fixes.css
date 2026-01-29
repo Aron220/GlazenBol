@@ -1,0 +1,4 @@
+/* Hide the bol.com app download banner that blocks the top of the page. */
+[role="dialog"][aria-labelledby="app-banner-title"][aria-describedby="app-banner-desc"] {
+  display: none !important;
+}

@@ -4,8 +4,10 @@ export const SORT_PREFERENCE_KEY = "glazenBolSortPreference";
 export const WELCOME_SEEN_KEY = "glazenBolWelcomeSeen";
 export const UPDATE_SEEN_VERSION_KEY = "glazenBolUpdateSeenVersion";
 export const PANEL_COLLAPSED_KEY = "glazenBolPanelCollapsed";
+export const PANEL_VIEW_KEY = "glazenBolPanelView";
 export const BLOCKED_SELLERS_KEY = "glazenBolBlockedSellers";
 export const BLOCKED_BRANDS_KEY = "glazenBolBlockedBrands";
+export const DARK_MODE_KEY = "glazenBolDarkMode";
 
 export const SORT_OPTIONS = [
   { value: "", label: "Geen voorkeur" },
@@ -22,21 +24,18 @@ export const DEFAULT_TOGGLES = [
   {
     id: "filter-merkloos",
     label: "Merkloze producten wegfilteren",
-    description: "",
     tooltip: "Verbergt producten waarvan het merk als 'Merkloos' of 'Sans Marque' staat vermeld.",
     enabled: true
   },
   {
     id: "filter-gesponsord",
     label: "Gesponsorde producten wegfilteren",
-    description: "",
     tooltip: "Verbergt gesponsorde producten in de lijst.",
     enabled: true
   },
   {
     id: "filter-general-ads",
     label: "Advertentieblokken wegfilteren",
-    description: "",
     tooltip: "Verbergt gesponsorde advertentieblokken tussen de productresultaten.",
     enabled: true
   },
@@ -67,7 +66,6 @@ export const DEFAULT_TOGGLES = [
   {
     id: "filter-verkoop-door-bol",
     label: "Verkoop door Bol",
-    description: "",
     tooltip: "Verbergt producten die niet door bol.com worden verkocht.",
     enabled: false
   }

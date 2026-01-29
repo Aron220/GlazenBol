@@ -1,127 +1,11 @@
-import { SELLER_BLOCK_HIDDEN_ATTR, markHidden, unmarkHidden } from "./visibility.js";
-
-const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"], a[href*="/p/"]';
-const LISTING_DATA_SELECTOR = '[data-bltgi*="ProductList"], [data-bltgh*="ProductList"]';
-const SELLER_LABEL_PATTERN = /^verkoop door\s*(.*)$/i;
-const SELLER_BOL_PATTERN = /\bbol(?:\.com)?\b/i;
-const BLOCK_BUTTON_CLASS = "bf-seller-block-btn";
-const STYLE_ID = "bf-seller-block-style";
-
-function normalizeSeller(text) {
-  return (text || "").trim().toLowerCase();
-}
-
-function getElementText(el) {
-  if (!el) return "";
-  const button = el.querySelector && el.querySelector(`.${BLOCK_BUTTON_CLASS}`);
-  if (!button) return (el.textContent || "");
-  let text = el.textContent || "";
-  const buttonText = button.textContent || "";
-  if (buttonText) {
-    text = text.replace(buttonText, "");
-  }
-  return text;
-}
-
-function isBolSeller(text) {
-  return SELLER_BOL_PATTERN.test(normalizeSeller(text));
-}
-
-function ensureStyles() {
-  if (document.getElementById(STYLE_ID)) return;
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
-    .${BLOCK_BUTTON_CLASS} {
-      margin-left: 6px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid #d5dbe3;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 0.72rem;
-      font-weight: 600;
-      cursor: pointer;
-      line-height: 1.3;
-    }
-    .${BLOCK_BUTTON_CLASS}:hover {
-      background: #f1f5f9;
-    }
-    .${BLOCK_BUTTON_CLASS}[disabled] {
-      background: #e2e8f0;
-      border-color: #e2e8f0;
-      color: #64748b;
-      cursor: default;
-    }
-  `;
-  document.head.appendChild(style);
-}
-
-function findListingRoot(startEl, { requireProductLink = true } = {}) {
-  const prefer =
-    startEl.closest(LISTING_DATA_SELECTOR) ||
-    startEl.closest('[data-test*="product"]') ||
-    startEl.closest('[role="listitem"]') ||
-    startEl.closest("article") ||
-    startEl.closest("li");
-  if (prefer && prefer !== document.body) {
-    if (!requireProductLink || prefer.querySelector(PRODUCT_LINK_SELECTOR)) return prefer;
-  }
-
-  let node = startEl;
-  let candidate = null;
-  let firstWithProductLink = null;
-  while (node && node !== document.body) {
-    if (node.querySelector && node.querySelector(PRODUCT_LINK_SELECTOR)) {
-      if (!firstWithProductLink) firstWithProductLink = node;
-      const linkCount = node.querySelectorAll(PRODUCT_LINK_SELECTOR).length;
-      if (linkCount <= 2) {
-        candidate = node;
-      } else if (candidate) {
-        break;
-      }
-    }
-    node = node.parentElement;
-  }
-  const resolved = candidate || firstWithProductLink;
-  return resolved && resolved !== document.body ? resolved : null;
-}
-
-function getSellerFromLabel(labelEl) {
-  let sibling = labelEl.nextElementSibling;
-  if (sibling && normalizeSeller(getElementText(sibling))) return getElementText(sibling) || "";
-
-  const parent = labelEl.parentElement;
-  if (!parent) return "";
-  const children = Array.from(parent.children);
-  const labelIndex = children.indexOf(labelEl);
-  for (let i = labelIndex + 1; i < children.length; i += 1) {
-    const text = getElementText(children[i]) || "";
-    if (normalizeSeller(text)) return text;
-  }
-  return "";
-}
-
-function findSellerFromElement(el) {
-  const ariaLabel = (el.getAttribute && el.getAttribute("aria-label")) || "";
-  if (ariaLabel) {
-    const match = ariaLabel.match(SELLER_LABEL_PATTERN);
-    if (match) {
-      const remainder = (match[1] || "").trim();
-      if (remainder) return remainder;
-    }
-  }
-
-  const text = getElementText(el).trim();
-  if (!text) return "";
-  const match = text.match(SELLER_LABEL_PATTERN);
-  if (!match) return "";
-  const remainder = (match[1] || "").trim();
-  if (remainder) return remainder;
-  const seller = getSellerFromLabel(el);
-  if (normalizeSeller(seller)) return seller;
-  return "";
-}
+import { SELLER_BLOCK_HIDDEN_ATTR } from "./visibility.js";
+import { findListingRoot } from "../utils/listingDetection.js";
+import { normalizeText } from "../utils/textUtils.js";
+import { createVisibilityHelpers } from "../utils/visibilityHelpers.js";
+import { findSellerFromElement, isBolSeller, SELLER_LABEL_PATTERN } from "../utils/sellerDetection.js";
+import { ensureBlockButtonStyles, BLOCK_BUTTON_CLASS } from "../utils/blockButtonStyles.js";
+import { TIMING } from "../utils/timing.js";
+import { createDebouncedScanner } from "../utils/scheduling.js";
 
 function resolveButtonContainer(labelEl) {
   let container = labelEl.parentElement || labelEl;
@@ -156,26 +40,16 @@ function ensureBlockButton({ container, sellerName, isBlocked, onBlock }) {
   updateBlockButton(button, { sellerName, isBlocked });
 }
 
-function hideListing(listingEl) {
-  if (listingEl === document.body || listingEl === document.documentElement) return;
-  markHidden(listingEl, SELLER_BLOCK_HIDDEN_ATTR);
-}
-
-function showListing(listingEl) {
-  if (listingEl === document.body || listingEl === document.documentElement) return;
-  unmarkHidden(listingEl, SELLER_BLOCK_HIDDEN_ATTR);
-}
-
 export function createSellerBlockFilter({ store }) {
   let blockedSellers = new Set();
-  let scanTimer = null;
+  const { hide, show } = createVisibilityHelpers(SELLER_BLOCK_HIDDEN_ATTR);
 
   const handleBlockSeller = (sellerName) => {
     store.addSeller(sellerName);
   };
 
   const scan = () => {
-    ensureStyles();
+    ensureBlockButtonStyles();
     const hiddenListings = new Set();
     const candidates = new Set();
 
@@ -197,10 +71,12 @@ export function createSellerBlockFilter({ store }) {
     candidates.forEach((el) => {
       const sellerText = findSellerFromElement(el);
       if (!sellerText) return;
+
       const listing = findListingRoot(el);
       if (!listing) return;
+
       const isBol = isBolSeller(sellerText);
-      const isBlocked = !isBol && blockedSellers.has(normalizeSeller(sellerText));
+      const isBlocked = !isBol && blockedSellers.has(normalizeText(sellerText));
 
       if (!isBol) {
         const container = resolveButtonContainer(el);
@@ -215,26 +91,20 @@ export function createSellerBlockFilter({ store }) {
 
       if (isBlocked) {
         hiddenListings.add(listing);
-        hideListing(listing);
+        hide(listing);
       } else {
-        showListing(listing);
+        show(listing);
       }
     });
 
     document.querySelectorAll(`[${SELLER_BLOCK_HIDDEN_ATTR}="true"]`).forEach((listing) => {
       if (!hiddenListings.has(listing)) {
-        showListing(listing);
+        show(listing);
       }
     });
   };
 
-  const scheduleScan = () => {
-    if (scanTimer) return;
-    scanTimer = window.setTimeout(() => {
-      scanTimer = null;
-      scan();
-    }, 120);
-  };
+  const { schedule: scheduleScan, clear: clearScan } = createDebouncedScanner(scan, TIMING.FILTER_SCAN_DEBOUNCE);
 
   const observer = new MutationObserver(() => {
     scheduleScan();
@@ -258,11 +128,8 @@ export function createSellerBlockFilter({ store }) {
   const destroy = () => {
     observer.disconnect();
     unsubscribe();
-    if (scanTimer) {
-      window.clearTimeout(scanTimer);
-      scanTimer = null;
-    }
-    document.querySelectorAll(`[${SELLER_BLOCK_HIDDEN_ATTR}="true"]`).forEach(showListing);
+    clearScan();
+    document.querySelectorAll(`[${SELLER_BLOCK_HIDDEN_ATTR}="true"]`).forEach(show);
   };
 
   return {

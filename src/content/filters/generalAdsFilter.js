@@ -1,23 +1,13 @@
-import { GENERAL_AD_HIDDEN_ATTR, markHidden, unmarkHidden } from "./visibility.js";
+import { GENERAL_AD_HIDDEN_ATTR } from "./visibility.js";
+import { normalizeText } from "../utils/textUtils.js";
+import { createVisibilityHelpers } from "../utils/visibilityHelpers.js";
+import { TIMING } from "../utils/timing.js";
+import { createDebouncedScanner } from "../utils/scheduling.js";
 
+import { AD_BADGE_SELECTOR } from "../utils/selectors.js";
 const AD_BADGE_TEXT = "gesponsord";
-const AD_BADGE_SELECTOR = "span.text-12";
 const AD_ICON_SELECTOR = 'svg[data-testid="advertisement-disclaimer-icon"]';
 const AD_BLOCK_SELECTOR = '[data-bltgg*="ProductList_Middle_considerationDisplay"]';
-
-function hideBlock(blockEl) {
-  if (blockEl === document.body || blockEl === document.documentElement) return;
-  markHidden(blockEl, GENERAL_AD_HIDDEN_ATTR);
-}
-
-function showBlock(blockEl) {
-  if (blockEl === document.body || blockEl === document.documentElement) return;
-  unmarkHidden(blockEl, GENERAL_AD_HIDDEN_ATTR);
-}
-
-function normalizeText(text) {
-  return (text || "").trim().toLowerCase();
-}
 
 function hasSponsoredBadge(badgeEl) {
   if (!badgeEl) return false;
@@ -41,41 +31,50 @@ function findAdBlock(startEl) {
 
 export function createGeneralAdsFilter() {
   let enabled = true;
+  const { hide, show } = createVisibilityHelpers(GENERAL_AD_HIDDEN_ATTR);
 
   const scan = () => {
+    const hiddenBlocks = new Set();
     const badges = document.querySelectorAll(AD_BADGE_SELECTOR);
     badges.forEach((badge) => {
       if (!hasSponsoredBadge(badge)) return;
       const block = findAdBlock(badge);
       if (!block) return;
+      hiddenBlocks.add(block);
       if (enabled) {
-        hideBlock(block);
+        hide(block);
       } else {
-        showBlock(block);
+        show(block);
+      }
+    });
+
+    document.querySelectorAll(`[${GENERAL_AD_HIDDEN_ATTR}="true"]`).forEach((block) => {
+      if (!enabled || !hiddenBlocks.has(block)) {
+        show(block);
       }
     });
   };
 
+  const { schedule: scheduleScan, clear: clearScan } = createDebouncedScanner(scan, TIMING.FILTER_SCAN_DEBOUNCE);
+
   const observer = new MutationObserver(() => {
-    scan();
+    scheduleScan();
   });
 
   const observe = () => {
     observer.observe(document.body, { childList: true, subtree: true });
-    scan();
+    scheduleScan();
   };
 
   const setEnabled = (next) => {
     enabled = Boolean(next);
-    if (!enabled) {
-      document.querySelectorAll(`[${GENERAL_AD_HIDDEN_ATTR}="true"]`).forEach(showBlock);
-    }
-    scan();
+    scheduleScan();
   };
 
   const destroy = () => {
     observer.disconnect();
-    document.querySelectorAll(`[${GENERAL_AD_HIDDEN_ATTR}="true"]`).forEach(showBlock);
+    clearScan();
+    document.querySelectorAll(`[${GENERAL_AD_HIDDEN_ATTR}="true"]`).forEach(show);
   };
 
   return {

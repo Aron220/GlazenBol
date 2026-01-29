@@ -8,11 +8,13 @@ import {
   BRAND_BLOCK_HIDDEN_ATTR
 } from "./filters/visibility.js";
 import { hideEmptyPageToast, showEmptyPageToast } from "./ui/emptyPageToast.js";
+import { findListingRoot, PRODUCT_LINK_SELECTOR } from "./utils/listingDetection.js";
+import { TIMING } from "./utils/timing.js";
+import { createDebouncedScanner } from "./utils/scheduling.js";
 
-const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"], a[href*="/p/"]';
 const LISTING_ROOT_SELECTOR =
   '[data-bltgi*="ProductList"], [data-bltgh*="ProductList"], [data-test*="product"], [role="listitem"], article, li';
-const DEFAULT_CHECK_DELAY_MS = 500;
+
 const HIDDEN_ATTRS = [
   MERKLOOS_HIDDEN_ATTR,
   SPONSORED_HIDDEN_ATTR,
@@ -25,46 +27,45 @@ const HIDDEN_ATTRS = [
 
 let lastToastMessage = null;
 
-function findListingRoot(startEl) {
-  const prefer = startEl.closest(LISTING_ROOT_SELECTOR);
-  if (prefer && prefer !== document.body && prefer.querySelector(PRODUCT_LINK_SELECTOR)) return prefer;
-
-  let node = startEl;
-  let candidate = null;
-  while (node && node !== document.body) {
-    if (node.querySelector && node.querySelector(PRODUCT_LINK_SELECTOR)) {
-      candidate = node;
-    }
-    node = node.parentElement;
-  }
-  return candidate && candidate !== document.body ? candidate : null;
-}
-
 function getListingRoots() {
   const listings = new Set();
+
+  // Find listings by product links
   document.querySelectorAll(PRODUCT_LINK_SELECTOR).forEach((link) => {
     const listing = findListingRoot(link);
     if (listing) listings.add(listing);
   });
+
+  // Find listings by container selectors
   document.querySelectorAll(LISTING_ROOT_SELECTOR).forEach((el) => {
-    if (el.matches("[data-test*=\"product\"]") || el.querySelector(PRODUCT_LINK_SELECTOR)) {
-      listings.add(el);
+    if (el.matches('[data-test*="product"]') || el.querySelector(PRODUCT_LINK_SELECTOR)) {
+      listings.add(findListingRoot(el) || el);
     }
   });
+
+  // Ensure we include currently hidden items
   HIDDEN_ATTRS.forEach((attr) => {
-    document.querySelectorAll(`[${attr}=\"true\"]`).forEach((el) => listings.add(el));
+    document.querySelectorAll(`[${attr}="true"]`).forEach((el) => listings.add(el));
   });
-  return Array.from(listings);
+
+  const listingsArray = Array.from(listings);
+  // Deduplicate: Keep only the innermost elements. If listing A contains listing B,
+  // we only count B to avoid double-counting containers and their content.
+  return listingsArray.filter(
+    (a) => !listingsArray.some((b) => a !== b && a.contains(b))
+  );
 }
 
 function isHidden(listingEl) {
   const hasAttr = (el) => HIDDEN_ATTRS.some((attr) => el.getAttribute(attr) === "true");
   if (hasAttr(listingEl)) return true;
+
   if (listingEl.closest) {
     for (const attr of HIDDEN_ATTRS) {
       if (listingEl.closest(`[${attr}="true"]`)) return true;
     }
   }
+
   if (listingEl.querySelector) {
     for (const attr of HIDDEN_ATTRS) {
       if (listingEl.querySelector(`[${attr}="true"]`)) return true;
@@ -77,6 +78,7 @@ function checkForEmptyPage({ root }) {
   const listings = getListingRoots().filter((listing) =>
     Boolean(listing.querySelector && listing.querySelector(PRODUCT_LINK_SELECTOR))
   );
+
   let message = null;
   if (!listings.length) {
     message = "Geen resultaten gevonden.";
@@ -94,9 +96,8 @@ function checkForEmptyPage({ root }) {
       const resultLabel = remaining === 1 ? "resultaat" : "resultaten";
       message =
         hiddenCount > 0
-          ? `Nog ${remaining} ${resultLabel} over (${hiddenCount} ${
-              hiddenCount === 1 ? "product" : "producten"
-            } verborgen).`
+          ? `Nog ${remaining} ${resultLabel} over (${hiddenCount} ${hiddenCount === 1 ? "product" : "producten"
+          } verborgen).`
           : `Nog ${remaining} ${resultLabel} over.`;
     }
   }
@@ -113,19 +114,13 @@ function checkForEmptyPage({ root }) {
 }
 
 export function createEmptyPageMonitor({ root } = {}) {
-  let checkTimer = null;
-
-  const scheduleCheck = ({ delayMs = DEFAULT_CHECK_DELAY_MS } = {}) => {
-    if (checkTimer) return;
-
-    checkTimer = window.setTimeout(() => {
-      checkTimer = null;
-      checkForEmptyPage({ root });
-    }, delayMs);
-  };
+  const { schedule, clear } = createDebouncedScanner(
+    () => checkForEmptyPage({ root }),
+    TIMING.EMPTY_PAGE_CHECK_DELAY
+  );
 
   const observer = new MutationObserver(() => {
-    scheduleCheck();
+    schedule();
   });
 
   const observe = () => {
@@ -139,15 +134,13 @@ export function createEmptyPageMonitor({ root } = {}) {
 
   const destroy = () => {
     observer.disconnect();
-    if (checkTimer) {
-      window.clearTimeout(checkTimer);
-      checkTimer = null;
-    }
+    clear();
   };
 
   return {
     observe,
-    scheduleCheck,
+    scheduleCheck: schedule,
     destroy
   };
 }
+

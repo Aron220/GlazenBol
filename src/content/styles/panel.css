@@ -101,12 +101,19 @@
 }
 
 .bf-button--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 32px;
   height: 32px;
   padding: 0;
   border-radius: 50%;
   font-size: 1rem;
   line-height: 1;
+}
+
+.bf-button--icon svg {
+  display: block;
 }
 
 .bf-button--small {
@@ -417,12 +424,12 @@
   transition: transform 0.18s ease;
 }
 
-.bf-switch__input:checked + .bf-switch {
+.bf-switch__input:checked+.bf-switch {
   background: linear-gradient(135deg, #0bbd3e, #00c853);
   border-color: #0bbd3e;
 }
 
-.bf-switch__input:checked + .bf-switch .bf-switch__knob {
+.bf-switch__input:checked+.bf-switch .bf-switch__knob {
   transform: translateX(20px);
 }
 
@@ -581,6 +588,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .bf-panel,
   .bf-panel.bf-panel--collapsed,
   .bf-floating-button,
@@ -589,4 +597,110 @@
   .bf-welcome {
     transition: none;
   }
+}
+
+/* Dark Mode Support */
+.bf-panel.bf-dark-mode {
+  background: #1e1e1e;
+  border-color: #333;
+  color: #e0e0e0;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
+}
+
+.bf-panel.bf-dark-mode .bf-panel__header {
+  background: linear-gradient(180deg, #252525, #1f1f1f);
+  border-bottom-color: #333;
+}
+
+.bf-panel.bf-dark-mode .bf-brand__name {
+  color: #fff;
+}
+
+.bf-panel.bf-dark-mode .bf-panel__footer {
+  background: #252525;
+  border-top-color: #333;
+}
+
+/* Dark Mode - Buttons */
+.bf-panel.bf-dark-mode .bf-button {
+  background: #2d2d2d;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.bf-panel.bf-dark-mode .bf-button:hover {
+  background: #383838;
+}
+
+.bf-panel.bf-dark-mode .bf-button--ghost {
+  background: transparent;
+}
+
+.bf-panel.bf-dark-mode .bf-button--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark Mode - Sort & Sections */
+.bf-panel.bf-dark-mode .bf-sort,
+.bf-panel.bf-dark-mode .bf-blocked,
+.bf-panel.bf-dark-mode .bf-toggle {
+  background: #252525;
+  border-color: #333;
+}
+
+.bf-panel.bf-dark-mode .bf-sort__label,
+.bf-panel.bf-dark-mode .bf-section-title,
+.bf-panel.bf-dark-mode .bf-toggle__label,
+.bf-panel.bf-dark-mode .bf-blocked__name {
+  color: #e0e0e0;
+}
+
+.bf-panel.bf-dark-mode .bf-select {
+  background: #333;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+/* Dark Mode - Text specifics */
+.bf-panel.bf-dark-mode .bf-blocked__empty,
+.bf-panel.bf-dark-mode .bf-blocked__hint,
+.bf-panel.bf-dark-mode .bf-toggle__description {
+  color: #aaa;
+}
+
+/* Dark Mode - Floating Button */
+.bf-floating-button.bf-dark-mode {
+  background: #1e1e1e;
+  color: #fff;
+  border-color: #333;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
+}
+
+.bf-floating-button.bf-dark-mode:hover {
+  background: #2d2d2d;
+}
+
+/* Dark Mode - Tooltips and Misc */
+.bf-panel.bf-dark-mode .bf-tooltip-icon {
+  background: #444;
+  color: #bbb;
+}
+
+/* Dark Mode - Switch */
+.bf-panel.bf-dark-mode .bf-switch {
+  background: #444;
+  border-color: #555;
+}
+
+.bf-panel.bf-dark-mode .bf-switch__knob {
+  background: #ccc;
+}
+
+.bf-panel.bf-dark-mode .bf-switch__input:checked+.bf-switch {
+  background: linear-gradient(135deg, #0bbd3e, #00c853);
+  border-color: #0bbd3e;
+}
+
+.bf-panel.bf-dark-mode .bf-switch__input:checked+.bf-switch .bf-switch__knob {
+  background: #fff;
 }

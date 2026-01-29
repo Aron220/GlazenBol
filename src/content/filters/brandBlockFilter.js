@@ -1,74 +1,12 @@
-import { BRAND_BLOCK_HIDDEN_ATTR, markHidden, unmarkHidden } from "./visibility.js";
+import { BRAND_BLOCK_HIDDEN_ATTR } from "./visibility.js";
+import { findListingRoot } from "../utils/listingDetection.js";
+import { normalizeText, getCleanText } from "../utils/textUtils.js";
+import { createVisibilityHelpers } from "../utils/visibilityHelpers.js";
+import { ensureBlockButtonStyles, BLOCK_BUTTON_CLASS } from "../utils/blockButtonStyles.js";
+import { TIMING } from "../utils/timing.js";
+import { createDebouncedScanner } from "../utils/scheduling.js";
 
-const BRAND_LINK_SELECTOR = 'a[href*="/b/"], a[href*="/pb/"]';
-const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"], a[href*="/p/"]';
-const LISTING_DATA_SELECTOR = '[data-bltgi*="ProductList"], [data-bltgh*="ProductList"]';
-const BLOCK_BUTTON_CLASS = "bf-brand-block-btn";
-const STYLE_ID = "bf-brand-block-style";
-
-function normalizeBrand(text) {
-  return (text || "").trim().toLowerCase();
-}
-
-function ensureStyles() {
-  if (document.getElementById(STYLE_ID)) return;
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
-    .${BLOCK_BUTTON_CLASS} {
-      margin-left: 6px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid #d5dbe3;
-      background: #ffffff;
-      color: #0f172a;
-      font-size: 0.72rem;
-      font-weight: 600;
-      cursor: pointer;
-      line-height: 1.3;
-    }
-    .${BLOCK_BUTTON_CLASS}:hover {
-      background: #f1f5f9;
-    }
-    .${BLOCK_BUTTON_CLASS}[disabled] {
-      background: #e2e8f0;
-      border-color: #e2e8f0;
-      color: #64748b;
-      cursor: default;
-    }
-  `;
-  document.head.appendChild(style);
-}
-
-function findListingRoot(startEl, { requireProductLink = true } = {}) {
-  const prefer =
-    startEl.closest(LISTING_DATA_SELECTOR) ||
-    startEl.closest('[data-test*="product"]') ||
-    startEl.closest('[role="listitem"]') ||
-    startEl.closest("article") ||
-    startEl.closest("li");
-  if (prefer && prefer !== document.body) {
-    if (!requireProductLink || prefer.querySelector(PRODUCT_LINK_SELECTOR)) return prefer;
-  }
-
-  let node = startEl;
-  let candidate = null;
-  let firstWithProductLink = null;
-  while (node && node !== document.body) {
-    if (node.querySelector && node.querySelector(PRODUCT_LINK_SELECTOR)) {
-      if (!firstWithProductLink) firstWithProductLink = node;
-      const linkCount = node.querySelectorAll(PRODUCT_LINK_SELECTOR).length;
-      if (linkCount <= 2) {
-        candidate = node;
-      } else if (candidate) {
-        break;
-      }
-    }
-    node = node.parentElement;
-  }
-  const resolved = candidate || firstWithProductLink;
-  return resolved && resolved !== document.body ? resolved : null;
-}
+import { BRAND_LINK_SELECTOR } from "../utils/selectors.js";
 
 function resolveButtonContainer(linkEl) {
   if (!linkEl) return null;
@@ -103,60 +41,45 @@ function ensureBlockButton({ container, brandName, isBlocked, onBlock }) {
   updateBlockButton(button, { brandName, isBlocked });
 }
 
-function hideListing(listingEl) {
-  if (listingEl === document.body || listingEl === document.documentElement) return;
-  markHidden(listingEl, BRAND_BLOCK_HIDDEN_ATTR);
-}
-
-function showListing(listingEl) {
-  if (listingEl === document.body || listingEl === document.documentElement) return;
-  unmarkHidden(listingEl, BRAND_BLOCK_HIDDEN_ATTR);
-}
-
 export function createBrandBlockFilter({ store }) {
   let blockedBrands = new Set();
-  let scanTimer = null;
+  const { hide, show } = createVisibilityHelpers(BRAND_BLOCK_HIDDEN_ATTR);
 
   const handleBlockBrand = (brandName) => {
     store.addBrand(brandName);
   };
 
   const scan = () => {
-    ensureStyles();
+    ensureBlockButtonStyles();
     const hiddenListings = new Set();
 
     document.querySelectorAll(BRAND_LINK_SELECTOR).forEach((brandLink) => {
-      const brandText = (brandLink.textContent || "").trim();
+      const brandText = getCleanText(brandLink, BLOCK_BUTTON_CLASS);
       if (!brandText) return;
+
       const listing = findListingRoot(brandLink);
       if (!listing) return;
 
-      const isBlocked = blockedBrands.has(normalizeBrand(brandText));
+      const isBlocked = blockedBrands.has(normalizeText(brandText));
       const container = resolveButtonContainer(brandLink);
       ensureBlockButton({ container, brandName: brandText, isBlocked, onBlock: handleBlockBrand });
 
       if (isBlocked) {
         hiddenListings.add(listing);
-        hideListing(listing);
+        hide(listing);
       } else {
-        showListing(listing);
+        show(listing);
       }
     });
 
     document.querySelectorAll(`[${BRAND_BLOCK_HIDDEN_ATTR}="true"]`).forEach((listing) => {
       if (!hiddenListings.has(listing)) {
-        showListing(listing);
+        show(listing);
       }
     });
   };
 
-  const scheduleScan = () => {
-    if (scanTimer) return;
-    scanTimer = window.setTimeout(() => {
-      scanTimer = null;
-      scan();
-    }, 120);
-  };
+  const { schedule: scheduleScan, clear: clearScan } = createDebouncedScanner(scan, TIMING.FILTER_SCAN_DEBOUNCE);
 
   const observer = new MutationObserver(() => {
     scheduleScan();
@@ -180,11 +103,8 @@ export function createBrandBlockFilter({ store }) {
   const destroy = () => {
     observer.disconnect();
     unsubscribe();
-    if (scanTimer) {
-      window.clearTimeout(scanTimer);
-      scanTimer = null;
-    }
-    document.querySelectorAll(`[${BRAND_BLOCK_HIDDEN_ATTR}="true"]`).forEach(showListing);
+    clearScan();
+    document.querySelectorAll(`[${BRAND_BLOCK_HIDDEN_ATTR}="true"]`).forEach(show);
   };
 
   return {

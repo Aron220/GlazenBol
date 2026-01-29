@@ -1,7 +1,10 @@
 import { createElement } from "../utils/dom.js";
 
-export function createFloatingButton({ onExpand, label = "Open" }) {
+export function createFloatingButton({ onExpand, label = "Open", darkModeEnabled = false }) {
   const button = createElement("button", { className: "bf-floating-button", text: label });
+  if (darkModeEnabled) {
+    button.classList.add("bf-dark-mode");
+  }
   button.type = "button";
   button.addEventListener("click", () => onExpand());
 
@@ -11,5 +14,9 @@ export function createFloatingButton({ onExpand, label = "Open" }) {
     button.tabIndex = isVisible ? 0 : -1;
   };
 
-  return { element: button, setVisible };
+  const setDarkMode = (enabled) => {
+    button.classList.toggle("bf-dark-mode", enabled);
+  };
+
+  return { element: button, setVisible, setDarkMode };
 }

@@ -5,18 +5,21 @@ import { createToggleStore } from "./state/toggleState.js";
 import { createBlockedSellerStore } from "./state/blockedSellerState.js";
 import { createBlockedBrandStore } from "./state/blockedBrandState.js";
 import { injectStylesheet } from "./utils/dom.js";
-import { storageGet, storageSet } from "./utils/storage.js";
+import { storageSet, loadStorageValue } from "./utils/storage.js";
+import { TIMING } from "./utils/timing.js";
 import {
   BLOCKED_SELLERS_KEY,
   BLOCKED_BRANDS_KEY,
   DEFAULT_TOGGLES,
   EXTENSION_NAME,
   PANEL_COLLAPSED_KEY,
+  PANEL_VIEW_KEY,
   SORT_OPTIONS,
   SORT_PREFERENCE_KEY,
   TOGGLE_STATE_KEY,
   UPDATE_SEEN_VERSION_KEY,
-  WELCOME_SEEN_KEY
+  WELCOME_SEEN_KEY,
+  DARK_MODE_KEY
 } from "../shared/constants.js";
 import { createMerkloosFilter } from "./filters/merkloosFilter.js";
 import { createGesponsordFilter } from "./filters/gesponsordFilter.js";
@@ -99,41 +102,12 @@ const startRootObserver = () => {
   rootObserver.observe(document.documentElement, { childList: true, subtree: true });
 };
 
-const loadToggleState = async () => {
-  const result = await storageGet(TOGGLE_STATE_KEY);
-  if (!result || typeof result !== "object") return null;
-  const state = result[TOGGLE_STATE_KEY];
-  if (!state || typeof state !== "object") return null;
-  return state;
-};
-
 const mergeToggles = (defaults, persisted) => defaults.map((toggle) => {
   if (persisted && Object.prototype.hasOwnProperty.call(persisted, toggle.id)) {
     return { ...toggle, enabled: Boolean(persisted[toggle.id]) };
   }
   return { ...toggle };
 });
-
-const loadSortPreference = async () => {
-  const result = await storageGet(SORT_PREFERENCE_KEY);
-  if (!result || typeof result !== "object") return "";
-  const preference = result[SORT_PREFERENCE_KEY];
-  return typeof preference === "string" ? preference : "";
-};
-
-const loadBlockedSellers = async () => {
-  const result = await storageGet(BLOCKED_SELLERS_KEY);
-  if (!result || typeof result !== "object") return [];
-  const sellers = result[BLOCKED_SELLERS_KEY];
-  return Array.isArray(sellers) ? sellers.filter((entry) => typeof entry === "string") : [];
-};
-
-const loadBlockedBrands = async () => {
-  const result = await storageGet(BLOCKED_BRANDS_KEY);
-  if (!result || typeof result !== "object") return [];
-  const brands = result[BLOCKED_BRANDS_KEY];
-  return Array.isArray(brands) ? brands.filter((entry) => typeof entry === "string") : [];
-};
 
 const normalizeSortPreference = (value) => {
   const allowed = new Set(SORT_OPTIONS.map((option) => option.value));
@@ -148,32 +122,7 @@ const persistToggleState = (list) => {
   return storageSet({ [TOGGLE_STATE_KEY]: state });
 };
 
-const persistSortPreference = (value) => storageSet({ [SORT_PREFERENCE_KEY]: value });
-const persistWelcomeSeen = () => storageSet({ [WELCOME_SEEN_KEY]: true });
-const persistPanelCollapsed = (isCollapsed) => storageSet({ [PANEL_COLLAPSED_KEY]: Boolean(isCollapsed) });
-const persistBlockedSellers = (sellers) => storageSet({ [BLOCKED_SELLERS_KEY]: sellers });
-const persistBlockedBrands = (brands) => storageSet({ [BLOCKED_BRANDS_KEY]: brands });
-const persistUpdateSeenVersion = (version) => storageSet({ [UPDATE_SEEN_VERSION_KEY]: version });
-
-const loadWelcomeSeen = async () => {
-  const result = await storageGet(WELCOME_SEEN_KEY);
-  if (!result || typeof result !== "object") return false;
-  return Boolean(result[WELCOME_SEEN_KEY]);
-};
-
-const loadUpdateSeenVersion = async () => {
-  const result = await storageGet(UPDATE_SEEN_VERSION_KEY);
-  if (!result || typeof result !== "object") return "";
-  const version = result[UPDATE_SEEN_VERSION_KEY];
-  return typeof version === "string" ? version : "";
-};
-
-const loadPanelCollapsed = async () => {
-  const result = await storageGet(PANEL_COLLAPSED_KEY);
-  if (!result || typeof result !== "object") return false;
-  const value = result[PANEL_COLLAPSED_KEY];
-  return typeof value === "boolean" ? value : false;
-};
+const persistKey = (key, value) => storageSet({ [key]: value });
 
 const SORT_OPTION_VALUES = new Set(
   SORT_OPTIONS.map((option) => option.value).filter(Boolean)
@@ -229,7 +178,7 @@ const scheduleSortPreference = (preference) => {
     if (applySortPreference(preference)) return;
     attempts += 1;
     if (attempts < maxAttempts) {
-      setTimeout(attempt, 250);
+      setTimeout(attempt, TIMING.SORT_RETRY_DELAY);
     }
   };
   attempt();
@@ -248,6 +197,8 @@ const getExtensionVersion = () => {
   }
   return "";
 };
+
+
 
 async function init() {
   if (initialized) return;
@@ -285,17 +236,31 @@ async function init() {
     "Vraagteken-iconen zijn netjes uitgelijnd."
   ];
   const updateOverlay = createUpdateOverlay({ version: currentVersion, highlights: updateHighlights });
-  const persistedToggles = await loadToggleState();
-  const persistedSortPreference = normalizeSortPreference(await loadSortPreference());
-  const persistedBlockedSellers = await loadBlockedSellers();
-  const persistedBlockedBrands = await loadBlockedBrands();
-  const welcomeSeen = await loadWelcomeSeen();
-  const updateSeenVersion = await loadUpdateSeenVersion();
-  const persistedPanelCollapsed = await loadPanelCollapsed();
+
+  const persistedToggles = (await loadStorageValue(TOGGLE_STATE_KEY)) || {};
+  const persistedSortPreference = normalizeSortPreference((await loadStorageValue(SORT_PREFERENCE_KEY)) || "");
+
+  const rawBlockedSellers = (await loadStorageValue(BLOCKED_SELLERS_KEY)) || [];
+  const persistedBlockedSellers = Array.isArray(rawBlockedSellers) ? rawBlockedSellers.filter(s => typeof s === "string") : [];
+
+  const rawBlockedBrands = (await loadStorageValue(BLOCKED_BRANDS_KEY)) || [];
+  const persistedBlockedBrands = Array.isArray(rawBlockedBrands) ? rawBlockedBrands.filter(b => typeof b === "string") : [];
+
+  const welcomeSeen = Boolean(await loadStorageValue(WELCOME_SEEN_KEY));
+  const updateSeenVersion = (await loadStorageValue(UPDATE_SEEN_VERSION_KEY)) || "";
+  const persistedPanelCollapsed = Boolean(await loadStorageValue(PANEL_COLLAPSED_KEY));
+  const persistedDarkMode = Boolean(await loadStorageValue(DARK_MODE_KEY));
+
+  const rawPanelView = (await loadStorageValue(PANEL_VIEW_KEY)) || "main";
+  const validViews = ["main", "settings", "blocked-sellers", "blocked-brands"];
+  const persistedPanelView = validViews.includes(rawPanelView) ? rawPanelView : "main";
+
   await stylesheetReady;
+
   const store = createToggleStore(mergeToggles(DEFAULT_TOGGLES, persistedToggles));
   const blockedSellerStore = createBlockedSellerStore(persistedBlockedSellers);
   const blockedBrandStore = createBlockedBrandStore(persistedBlockedBrands);
+
   const filters = {
     "filter-merkloos": createMerkloosFilter(),
     "filter-gesponsord": createGesponsordFilter(),
@@ -305,6 +270,7 @@ async function init() {
     "filter-seller-block": createSellerBlockFilter({ store: blockedSellerStore }),
     "filter-brand-block": createBrandBlockFilter({ store: blockedBrandStore })
   };
+
   const emptyPageMonitor = createEmptyPageMonitor({ root: shadow });
 
   const setCollapsed = (isCollapsed, { persist = true } = {}) => {
@@ -313,7 +279,7 @@ async function init() {
     panel.setVisible(!collapsed);
     floatingButton.setVisible(collapsed);
     if (persist) {
-      void persistPanelCollapsed(collapsed);
+      persistKey(PANEL_COLLAPSED_KEY, collapsed);
     }
   };
 
@@ -327,15 +293,26 @@ async function init() {
     sortValue: persistedSortPreference,
     onSortChange: (value) => {
       const normalized = normalizeSortPreference(value);
-      void persistSortPreference(normalized);
+      persistKey(SORT_PREFERENCE_KEY, normalized);
       scheduleSortPreference(normalized);
     },
     onCollapse: () => setCollapsed(true),
-    onHelp: () => welcomeOverlay.show()
+    onHelp: () => welcomeOverlay.show(),
+    darkModeEnabled: persistedDarkMode,
+    onDarkModeChange: (enabled) => {
+      panel.setDarkMode(enabled);
+      floatingButton.setDarkMode(enabled);
+      persistKey(DARK_MODE_KEY, enabled);
+    },
+    currentView: persistedPanelView,
+    onViewChange: (view) => {
+      persistKey(PANEL_VIEW_KEY, view);
+    }
   });
 
   const floatingButton = createFloatingButton({
     label: EXTENSION_NAME,
+    darkModeEnabled: persistedDarkMode,
     onExpand: () => setCollapsed(false)
   });
 
@@ -352,39 +329,43 @@ async function init() {
 
   Object.values(filters).forEach((filter) => filter.observe());
   emptyPageMonitor.observe();
-  emptyPageMonitor.scheduleCheck({ delayMs: 500 });
+  emptyPageMonitor.scheduleCheck({ delayMs: 500 }); // Using logic inside emptyPageMonitor which handles default, but here explicit is fine
 
   store.subscribe((list) => {
+    const activeState = {};
     list.forEach((toggle) => {
       const filter = filters[toggle.id];
       if (filter && typeof filter.setEnabled === "function") {
         filter.setEnabled(Boolean(toggle.enabled));
       }
+      activeState[toggle.id] = toggle.enabled;
     });
-    void persistToggleState(list);
+    // We can use persistKey here but persistToggleState has extra logic to transform list to object, 
+    // which I kept above? Yes.
+    persistToggleState(list);
     emptyPageMonitor.scheduleCheck();
   });
 
   blockedSellerStore.subscribe(({ sellers }) => {
-    void persistBlockedSellers(sellers);
+    persistKey(BLOCKED_SELLERS_KEY, sellers);
     emptyPageMonitor.scheduleCheck();
   });
 
   blockedBrandStore.subscribe(({ brands }) => {
-    void persistBlockedBrands(brands);
+    persistKey(BLOCKED_BRANDS_KEY, brands);
     emptyPageMonitor.scheduleCheck();
   });
 
   scheduleSortPreference(persistedSortPreference);
 
   if (!welcomeSeen) {
-    void persistWelcomeSeen();
+    persistKey(WELCOME_SEEN_KEY, true);
     if (currentVersion) {
-      void persistUpdateSeenVersion(currentVersion);
+      persistKey(UPDATE_SEEN_VERSION_KEY, currentVersion);
     }
     welcomeOverlay.show();
   } else if (currentVersion && updateSeenVersion !== currentVersion) {
-    void persistUpdateSeenVersion(currentVersion);
+    persistKey(UPDATE_SEEN_VERSION_KEY, currentVersion);
     updateOverlay.show();
   }
 }

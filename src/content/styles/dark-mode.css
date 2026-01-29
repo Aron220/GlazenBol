@@ -1,0 +1,523 @@
+/* Dark Mode Wrapper */
+html.bf-dark-mode body {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+html.bf-dark-mode header,
+html.bf-dark-mode footer,
+html.bf-dark-mode .ui-header,
+html.bf-dark-mode .ui-footer {
+  background-color: #1a1a1a !important;
+  border-color: #333 !important;
+}
+
+/* Links */
+html.bf-dark-mode a {
+  color: #64b5f6 !important;
+}
+
+/* Cards / Content Boxes */
+html.bf-dark-mode .product-item,
+html.bf-dark-mode .product-card,
+html.bf-dark-mode .card,
+html.bf-dark-mode .white-bg {
+  background-color: #1e1e1e !important;
+  border-color: #333 !important;
+  color: #e0e0e0 !important;
+}
+
+/* Form Inputs */
+html.bf-dark-mode input,
+html.bf-dark-mode select,
+html.bf-dark-mode textarea {
+  background-color: #2d2d2d !important;
+  color: #fff !important;
+  border-color: #444 !important;
+}
+
+/* Common Bol.com background utility classes overrides (best guess, generic) */
+html.bf-dark-mode [class*="bg-white"] {
+  background-color: #1e1e1e !important;
+}
+
+html.bf-dark-mode [class*="bg-light"] {
+  background-color: #121212 !important;
+}
+
+/* Headings */
+html.bf-dark-mode h1,
+html.bf-dark-mode h2,
+html.bf-dark-mode h3,
+html.bf-dark-mode h4,
+html.bf-dark-mode h5,
+html.bf-dark-mode h6,
+html.bf-dark-mode .heading {
+  color: #fff !important;
+}
+
+/* SVGs/Icons - Invert logic for black icons */
+html.bf-dark-mode svg {
+  filter: invert(0.8) hue-rotate(180deg);
+}
+
+/* Images opacity slightly lower to reduce glare */
+html.bf-dark-mode img {
+  opacity: 0.9;
+}
+
+/* Fix: Zoomed product image container stays white in dark mode */
+html.bf-dark-mode [data-testid="content"][data-bltgi],
+html.bf-dark-mode [data-testid^="current-zoom-image-"] {
+  background-color: #0f1114 !important;
+}
+
+/* Fixed: Brand cards images with -z-10 were getting hidden by dark background */
+html.bf-dark-mode img[class*="-z-10"],
+html.bf-dark-mode .-z-10 {
+  z-index: 0 !important;
+}
+
+/* Fixed: Utility classes forcing black text on dark background */
+html.bf-dark-mode [class*="text-neutral-text-high"],
+html.bf-dark-mode [class*="text-brand-text-high"],
+html.bf-dark-mode .text-neutral-text-high,
+html.bf-dark-mode .text-brand-text-high {
+  color: #e0e0e0 !important;
+}
+
+/* Fixed: Header Improvements */
+html.bf-dark-mode .bg-brand-background-high {
+  background-color: #151515 !important;
+  /* Slightly darker than generic header for brand feel */
+}
+
+/* Fix USP Bar & Nav Bar Backgrounds (white strips) */
+html.bf-dark-mode .bg-neutral-background-low,
+html.bf-dark-mode .lg\:bg-neutral-background-low {
+  background-color: #1e1e1e !important;
+}
+
+html.bf-dark-mode .border-neutral-border-low {
+  border-color: #333 !important;
+}
+
+/* Fix Search Input Rounding & Style */
+html.bf-dark-mode .bg-neutral-background-input {
+  background-color: #2d2d2d !important;
+  border-radius: 9999px !important;
+  /* Force rounding */
+  border: 1px solid #444 !important;
+}
+
+
+html.bf-dark-mode #searchfor {
+  background-color: transparent !important;
+  /* Let container rounded bg show through */
+  color: #fff !important;
+}
+
+
+/* Fix: Restore desktop transparency for elements causing "dark blocks" (like search wrapper) */
+@media (min-width: 1024px) {
+  html.bf-dark-mode [class*="lg:bg-transparent"] {
+    background-color: transparent !important;
+  }
+}
+
+/* Fix: Neutral background container (e.g., View Mode button) */
+html.bf-dark-mode .bg-neutral-background-container {
+  background-color: #2d2d2d !important;
+  /* Slightly lighter than page bg to stand out as button */
+  color: #e0e0e0 !important;
+}
+
+html.bf-dark-mode .text-brand-text-interactive-default {
+  color: #64b5f6 !important;
+  /* Light blue for interactive elements */
+}
+
+
+/* ========================================= */
+/* SPECIFIC PAGE FIXES (Product Page, etc.)  */
+/* ========================================= */
+
+/* 1. Search Bar Container Fixes */
+html.bf-dark-mode .wsp-search-form__input,
+html.bf-dark-mode .wsp-search__input,
+html.bf-dark-mode form[action*="/zoeken"] {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+  color: #fff !important;
+}
+
+/* Ensure the input element itself is transparent so container color shows, or matches */
+html.bf-dark-mode input#searchfor {
+  background-color: transparent !important;
+  color: #fff !important;
+}
+
+/* Search Suggestions / History items */
+html.bf-dark-mode [role="option"] {
+  background-color: transparent !important;
+  /* Inherit from container */
+  color: #e0e0e0 !important;
+}
+
+html.bf-dark-mode [role="option"]:hover,
+html.bf-dark-mode [role="option"][aria-selected="true"],
+html.bf-dark-mode [role="option"].is-active {
+  background-color: #3d3d3d !important;
+  cursor: pointer;
+}
+
+/* 2. "Terug" (Back) Button Fixes */
+html.bf-dark-mode .wsp-sub-nav__link--back,
+html.bf-dark-mode .breadcrumbs__link,
+html.bf-dark-mode a[data-test="breadcrumb"] {
+  background-color: transparent !important;
+  color: #81d4fa !important;
+  /* Light Blue for visibility */
+}
+
+/* If the back button is a standalone card/button */
+html.bf-dark-mode .ui-btn--secondary {
+  background-color: #333 !important;
+  color: #fff !important;
+  border-color: #555 !important;
+}
+
+/* 3. Product Description "Show more" Gradient Fix */
+/* The fade effect usually uses a gradient from transparent to white */
+html.bf-dark-mode .show-more__fade,
+html.bf-dark-mode .js_show-more-button,
+html.bf-dark-mode [class*="show-more__fade"] {
+  background: linear-gradient(to bottom, rgba(18, 18, 18, 0), #121212) !important;
+}
+
+/* The container of the "toon meer" button might need a dark bg if it's separate */
+html.bf-dark-mode .show-more-button {
+  background-color: #333 !important;
+  color: #fff !important;
+  border-color: #555 !important;
+}
+
+/* 4. Specifications Table (Algemene kenmerken) Fixes */
+/* Overriding alternating row colors */
+html.bf-dark-mode .specs__row,
+html.bf-dark-mode .specs__item,
+html.bf-dark-mode dl.specs {
+  background-color: transparent !important;
+  color: #e0e0e0 !important;
+}
+
+/* Frequently, rows have inline styles or specific generic classes for grey bg */
+/* We target standard list items or definition lists in the specs area */
+html.bf-dark-mode .specs__row:nth-child(odd),
+html.bf-dark-mode .specs__row:nth-child(even) {
+  background-color: transparent !important;
+}
+
+/* If there is a "highlighted" row style */
+html.bf-dark-mode [class*="bg-light"] {
+  background-color: #1e1e1e !important;
+}
+
+/* Fix specific table cell backgrounds if they exist */
+html.bf-dark-mode dt,
+html.bf-dark-mode dd {
+  background-color: transparent !important;
+  color: #cfcfcf !important;
+}
+
+/* 4b. Productspecificaties (new PDP specs layout) */
+html.bf-dark-mode section[data-testid="productspecification"] {
+  background-color: transparent !important;
+  color: #d9d9d9 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="collapsible-content"] {
+  background-color: transparent !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [class*="bg-neutral-background-medium"] {
+  background-color: #1f1f1f !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [class*="bg-neutral-background-low"] {
+  background-color: #151515 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents > div:nth-child(odd) > div > div {
+  background-color: #1f1f1f !important;
+  color: #e6e6e6 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents > div:nth-child(even) > div > div {
+  background-color: #151515 !important;
+  color: #e6e6e6 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents > div > div * {
+  color: #e6e6e6 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents {
+  background-color: #121212 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents > div:nth-child(odd),
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents > div:nth-child(odd) > div {
+  background-color: #1f1f1f !important;
+  border-color: #2a2a2a !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents > div:nth-child(even),
+html.bf-dark-mode section[data-testid="productspecification"] [data-testid="data_table"] > .contents > div:nth-child(even) > div {
+  background-color: #151515 !important;
+  border-color: #2a2a2a !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] .bg-neutral-background-input,
+html.bf-dark-mode section[data-testid="productspecification"] [class*="bg-neutral-background-input"] {
+  background-color: #202020 !important;
+  border-color: #3a3a3a !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [role="search"] {
+  border-color: #3a3a3a !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] input,
+html.bf-dark-mode section[data-testid="productspecification"] select,
+html.bf-dark-mode section[data-testid="productspecification"] textarea {
+  background-color: transparent !important;
+  color: #e6e6e6 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] input::placeholder,
+html.bf-dark-mode section[data-testid="productspecification"] textarea::placeholder {
+  color: #9aa0a6 !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [class*="text-neutral-text-medium"] {
+  color: #bdbdbd !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [class*="text-neutral-text-interactive-default"],
+html.bf-dark-mode section[data-testid="productspecification"] a {
+  color: #8ec5ff !important;
+}
+
+html.bf-dark-mode section[data-testid="productspecification"] [class*="border-neutral-border"],
+html.bf-dark-mode section[data-testid="productspecification"] [class*="border-brand-border"] {
+  border-color: #333 !important;
+}
+
+/* 5. Generic "White" Block Fixes in Content */
+/* Identify containers that are explicitly white */
+html.bf-dark-mode .bg-white,
+html.bf-dark-mode .white-bg {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+}
+
+/* 6. Header & Navigation Fixes */
+html.bf-dark-mode .usp-banner,
+html.bf-dark-mode .wsp-offcanvas--main-menu,
+html.bf-dark-mode .wsp-main-nav__ghost,
+html.bf-dark-mode .wsp-category-nav-ab-sub-panel,
+html.bf-dark-mode .wsp-header__bottom-nav,
+html.bf-dark-mode .wsp-sub-nav,
+html.bf-dark-mode .wsp-main-nav-panel,
+html.bf-dark-mode .wsp-main-nav-content,
+html.bf-dark-mode .wsp-main-nav-constrain,
+html.bf-dark-mode [class*="wsp-main-nav-panel"],
+html.bf-dark-mode wsp-main-nav-offcanvas,
+html.bf-dark-mode wsp-main-nav-category-ab {
+  background-color: #1a1a1a !important;
+  color: #e0e0e0 !important;
+  border-color: #333 !important;
+}
+
+/* Ensure secondary nav links are visible */
+html.bf-dark-mode .wsp-main-nav__link,
+html.bf-dark-mode .wsp-nav-link,
+html.bf-dark-mode .wsp-sub-nav__link,
+html.bf-dark-mode .wsp-category-nav-ab__link,
+html.bf-dark-mode .wsp-category-nav__link {
+  color: #e0e0e0 !important;
+}
+
+/* Hover states for nav links */
+html.bf-dark-mode .wsp-main-nav__link:hover,
+html.bf-dark-mode .wsp-nav-link:hover,
+html.bf-dark-mode .wsp-sub-nav__link:hover,
+html.bf-dark-mode .wsp-category-nav-ab__link:hover,
+html.bf-dark-mode .wsp-category-nav__link:hover {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+/* 7. Refined "Terug" (Back) Button */
+/* Targeting specific structure provided by user */
+html.bf-dark-mode .c-btn-tertiary--large,
+html.bf-dark-mode .po_breadcrumb_back a,
+html.bf-dark-mode .po_breadcrumb_back {
+  background-color: transparent !important;
+  color: #81d4fa !important;
+  border-color: transparent !important;
+}
+
+/* Ensure the breadcrumb container itself is transparent */
+html.bf-dark-mode .fluid-grid.fluid-grid--middle.u-pb--xs\@screen-large-up {
+  background-color: transparent !important;
+}
+
+/* Fix SVG icon fill in back button */
+html.bf-dark-mode .po_breadcrumb_back svg,
+html.bf-dark-mode .c-btn-tertiary--large svg {
+  fill: #81d4fa !important;
+}
+
+/* Ensure breadcrumb home icon is visible */
+html.bf-dark-mode .breadcrumbs__link svg {
+  fill: #81d4fa !important;
+}
+
+/* 8. Feature List (Variant Picker) Fixes */
+html.bf-dark-mode .feature-list,
+html.bf-dark-mode .feature-list__item,
+html.bf-dark-mode .feature-list__options {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+  border-color: #333 !important;
+}
+
+html.bf-dark-mode .feature-list__text,
+html.bf-dark-mode .feature-list__row-item {
+  color: #e0e0e0 !important;
+}
+
+html.bf-dark-mode .feature-list__item--current,
+html.bf-dark-mode .feature-list__item.is-selected {
+  background-color: #333 !important;
+  border-color: #64b5f6 !important;
+}
+
+html.bf-dark-mode .feature-list__disabled {
+  color: #777 !important;
+}
+
+html.bf-dark-mode .feature-list__warning {
+  color: #ffb74d !important;
+  /* Orange/Warning color */
+}
+
+/* Fix: Uitsmijter (Customer Service bottom section) */
+html.bf-dark-mode .h-bg-color-brand-module,
+html.bf-dark-mode .kis-uitsmijter {
+  background-color: #1a1a1a !important;
+  color: #e0e0e0 !important;
+}
+
+/* Fix: SVG backgrounds in Uitsmijter */
+html.bf-dark-mode .kis-uitsmijter .color-bg {
+  fill: #333 !important;
+}
+
+/* Fix: Neutral background medium-low (Discount banners, etc.) */
+html.bf-dark-mode .bg-neutral-background-medium-low,
+html.bf-dark-mode .md\:bg-neutral-background-medium-low,
+html.bf-dark-mode [class*="bg-neutral-background-medium"] {
+  background-color: #1e1e1e !important;
+}
+
+/* Fix: Product images turning black due to mix-blend-mode: darken */
+html.bf-dark-mode img,
+html.bf-dark-mode .mix-blend-darken {
+  mix-blend-mode: normal !important;
+}
+
+/* ========================================= */
+/* 9. BADGES & LABELS                        */
+/* ========================================= */
+
+/* "Goede Keuze" (Green - accent3) */
+html.bf-dark-mode .bg-accent3-background-low {
+  background-color: #064e3b !important;
+  /* Dark emerald background */
+  border: 1px solid #065f46 !important;
+}
+
+/* "Bestseller / Promotional" (Yellow/Orange - accent1) */
+html.bf-dark-mode .bg-accent1-background-low {
+  background-color: #451a03 !important;
+  /* Dark orange/brown */
+  border: 1px solid #78350f !important;
+}
+
+/* "Brand / Secondary" (Blue - accent2) */
+html.bf-dark-mode .bg-accent2-background-low {
+  background-color: #1e3a8a !important;
+  /* Dark blue */
+  border: 1px solid #1e40af !important;
+}
+
+/* Ensure the text inside all accent badges is legible and themed */
+html.bf-dark-mode .bg-accent1-background-low .text-brand-text-high {
+  color: #fbbf24 !important;
+}
+
+html.bf-dark-mode .bg-accent2-background-low .text-brand-text-high {
+  color: #93c5fd !important;
+}
+
+html.bf-dark-mode .bg-accent3-background-low .text-brand-text-high,
+html.bf-dark-mode .bg-accent3-background-low [class*="text-brand-text-high"] {
+  color: #71e9b4 !important;
+  /* Original mint green for text */
+}
+
+/* Preserve original brand colors for icons in these badges */
+html.bf-dark-mode [class*="bg-accent"] svg {
+  filter: none !important;
+}
+
+/* ========================================= */
+/* 10. SUSTAINABILITY FEATURES               */
+/* ========================================= */
+
+html.bf-dark-mode [class*="bg-neutral-background-low"] {
+  background-color: #2d2d2d !important;
+}
+
+html.bf-dark-mode .sustainable-slot__evidence-list,
+html.bf-dark-mode .sustainable-slot__evidence-list-item,
+html.bf-dark-mode .sustainable-slot__evidence-list-item div {
+  background-color: transparent !important;
+  color: #e0e0e0 !important;
+}
+
+/* Sustainability tooltips and icons */
+html.bf-dark-mode .sustainable-slot__tooltip svg {
+  fill: #81d4fa !important;
+  /* Light blue for info icons */
+  filter: none !important;
+}
+
+/* Tooltip popup content override */
+html.bf-dark-mode .js_tooltip_content,
+html.bf-dark-mode .tooltip,
+html.bf-dark-mode [data-test="evidence-tooltip"],
+html.bf-dark-mode [class*="bg-neutral-background-input"] {
+  background-color: #2d2d2d !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ensure any text inside the slot is visible */
+html.bf-dark-mode [data-test="evidence-list"] {
+  color: #e0e0e0 !important;
+}

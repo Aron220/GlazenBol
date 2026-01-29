@@ -1,70 +1,25 @@
-import { SPONSORED_HIDDEN_ATTR, markHidden, unmarkHidden } from "./visibility.js";
+import { SPONSORED_HIDDEN_ATTR } from "./visibility.js";
+import { findListingRoot, PRODUCT_LINK_SELECTOR } from "../utils/listingDetection.js";
+import { normalizeText } from "../utils/textUtils.js";
+import { createVisibilityHelpers } from "../utils/visibilityHelpers.js";
+import { TIMING } from "../utils/timing.js";
+import { createDebouncedScanner } from "../utils/scheduling.js";
 
-const PRODUCT_LINK_SELECTOR = 'a[href*="/nl/nl/p/"]';
+import { SPONSORED_BADGE_SELECTOR } from "../utils/selectors.js";
+
 const SPONSORED_KEYWORDS = ["gesponsord", "gesponsorde", "sponsored"];
-const SPONSORED_BADGE_SELECTOR = "span.text-12.text-neutral-text-medium";
 const SPONSORED_ICON_SELECTOR = 'svg[data-testid="advertisement-disclaimer-icon"]';
 const PDP_SPONSORED_ITEM_SELECTOR = ".js_sponsored-products_item";
 const PDP_SPONSORED_LABEL_SELECTOR = ".dsa__label__text, button.dsa__label";
 
-function normalizeText(text) {
-  return (text || "").trim().toLowerCase();
-}
-
-function findListingRoot(startEl) {
-  const prefer =
-    startEl.closest('[data-bltgi*="ProductList"]') ||
-    startEl.closest('[data-test*="product"]') ||
-    startEl.closest('[role="listitem"]') ||
-    startEl.closest("article") ||
-    startEl.closest("li");
-  if (prefer && prefer !== document.body && prefer.querySelector(PRODUCT_LINK_SELECTOR)) return prefer;
-
-  let node = startEl;
-  let candidate = null;
-  while (node && node !== document.body) {
-    if (node.querySelector(PRODUCT_LINK_SELECTOR)) {
-      const linkCount = node.querySelectorAll(PRODUCT_LINK_SELECTOR).length;
-      if (linkCount <= 2) {
-        candidate = node;
-      } else if (candidate) {
-        break;
-      }
-    }
-    node = node.parentElement;
-  }
-  return candidate && candidate !== document.body ? candidate : null;
-}
-
-function hasSponsoredBadge(listingEl) {
-  const badges = listingEl.querySelectorAll(SPONSORED_BADGE_SELECTOR);
-  for (const badge of badges) {
-    const text = normalizeText(badge.textContent);
-    if (!SPONSORED_KEYWORDS.some((kw) => text.includes(kw))) continue;
-    const container = badge.parentElement || listingEl;
-    if (container.querySelector(SPONSORED_ICON_SELECTOR)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function hideListing(listingEl) {
-  if (listingEl === document.body || listingEl === document.documentElement) return;
-  markHidden(listingEl, SPONSORED_HIDDEN_ATTR);
-}
-
-function showListing(listingEl) {
-  if (listingEl === document.body || listingEl === document.documentElement) return;
-  unmarkHidden(listingEl, SPONSORED_HIDDEN_ATTR);
-}
-
 export function createGesponsordFilter() {
   let enabled = true;
-  let scanTimer = null;
+  const { hide, show } = createVisibilityHelpers(SPONSORED_HIDDEN_ATTR);
 
   const scan = () => {
     const sponsoredListings = new Set();
+
+    // Scan for sponsored badges in search results
     const badges = document.querySelectorAll(SPONSORED_BADGE_SELECTOR);
     badges.forEach((badge) => {
       const text = normalizeText(badge.textContent);
@@ -75,20 +30,22 @@ export function createGesponsordFilter() {
       if (!listing) return;
       sponsoredListings.add(listing);
       if (enabled) {
-        hideListing(listing);
+        hide(listing);
       }
     });
 
+    // Scan for sponsored items on product detail pages
     const pdpSponsoredItems = document.querySelectorAll(PDP_SPONSORED_ITEM_SELECTOR);
     pdpSponsoredItems.forEach((item) => {
       const listing = item.matches("li, article, [role='listitem']") ? item : findListingRoot(item);
       if (!listing) return;
       sponsoredListings.add(listing);
       if (enabled) {
-        hideListing(listing);
+        hide(listing);
       }
     });
 
+    // Scan for sponsored labels on product detail pages
     const pdpSponsoredLabels = document.querySelectorAll(PDP_SPONSORED_LABEL_SELECTOR);
     pdpSponsoredLabels.forEach((label) => {
       const text = normalizeText(label.textContent);
@@ -97,24 +54,19 @@ export function createGesponsordFilter() {
       if (!listing) return;
       sponsoredListings.add(listing);
       if (enabled) {
-        hideListing(listing);
+        hide(listing);
       }
     });
 
+    // Clean up any listings that are no longer sponsored
     document.querySelectorAll(`[${SPONSORED_HIDDEN_ATTR}="true"]`).forEach((listing) => {
       if (!enabled || !sponsoredListings.has(listing)) {
-        showListing(listing);
+        show(listing);
       }
     });
   };
 
-  const scheduleScan = () => {
-    if (scanTimer) return;
-    scanTimer = window.setTimeout(() => {
-      scanTimer = null;
-      scan();
-    }, 120);
-  };
+  const { schedule: scheduleScan, clear: clearScan } = createDebouncedScanner(scan, TIMING.FILTER_SCAN_DEBOUNCE);
 
   const observer = new MutationObserver(() => {
     scheduleScan();
@@ -132,19 +84,13 @@ export function createGesponsordFilter() {
 
   const setEnabled = (next) => {
     enabled = Boolean(next);
-    if (!enabled) {
-      document.querySelectorAll(`[${SPONSORED_HIDDEN_ATTR}="true"]`).forEach(showListing);
-    }
     scheduleScan();
   };
 
   const destroy = () => {
     observer.disconnect();
-    if (scanTimer) {
-      window.clearTimeout(scanTimer);
-      scanTimer = null;
-    }
-    document.querySelectorAll(`[${SPONSORED_HIDDEN_ATTR}="true"]`).forEach(showListing);
+    clearScan();
+    document.querySelectorAll(`[${SPONSORED_HIDDEN_ATTR}="true"]`).forEach(show);
   };
 
   return {

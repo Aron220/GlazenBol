@@ -9,9 +9,16 @@ export function createPanel({
   sortValue = "",
   onSortChange,
   onCollapse,
-  onHelp
+  onHelp,
+  darkModeEnabled = false,
+  onDarkModeChange,
+  currentView = "main",
+  onViewChange
 }) {
   const panel = createElement("section", { className: "bf-panel" });
+  if (darkModeEnabled) {
+    panel.classList.add("bf-dark-mode");
+  }
   const tooltip = createElement("div", { className: "bf-global-tooltip" });
   tooltip.style.display = "none";
 
@@ -61,6 +68,12 @@ export function createPanel({
   brand.append(brandLogo, brandName);
 
   const actions = createElement("div", { className: "bf-panel__actions" });
+  const settingsButton = createElement("button", { className: "bf-button bf-button--ghost bf-button--icon" });
+  settingsButton.type = "button";
+  settingsButton.setAttribute("aria-label", "Instellingen");
+  settingsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 8.9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.6 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9.4a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>';
+  settingsButton.addEventListener("click", () => setView("settings"));
+
   const helpButton = createElement("button", { className: "bf-button bf-button--ghost bf-button--icon", text: "?" });
   helpButton.type = "button";
   helpButton.setAttribute("aria-label", "Uitleg");
@@ -74,7 +87,7 @@ export function createPanel({
   collapseButton.type = "button";
   collapseButton.addEventListener("click", () => onCollapse());
 
-  actions.append(helpButton, collapseButton);
+  actions.append(settingsButton, helpButton, collapseButton);
   header.append(brand, actions);
 
   const body = createElement("div", { className: "bf-panel__body" });
@@ -82,6 +95,7 @@ export function createPanel({
   const mainView = createElement("div", { className: "bf-panel__view-panel bf-panel__view-panel--active" });
   const blockedSellerView = createElement("div", { className: "bf-panel__view-panel" });
   const blockedBrandView = createElement("div", { className: "bf-panel__view-panel" });
+  const settingsView = createElement("div", { className: "bf-panel__view-panel" });
   const sortSection = createElement("div", { className: "bf-sort" });
   const sortLabel = createElement("label", { className: "bf-sort__label", text: "Standaard sortering" });
   const sortSelect = createElement("select", {
@@ -165,7 +179,7 @@ export function createPanel({
   blockedBrandHeader.append(blockedBrandHeaderTitle, brandBackButton);
   blockedBrandView.append(blockedBrandHeader, blockedBrandWrap);
 
-  view.append(mainView, blockedSellerView, blockedBrandView);
+  view.append(mainView, blockedSellerView, blockedBrandView, settingsView);
   body.append(view);
 
   const footer = createElement("footer", { className: "bf-panel__footer" });
@@ -194,16 +208,16 @@ export function createPanel({
     return document.importNode(svg, true);
   };
 
-  const renderToggle = (toggle) => {
+  const createToggleStructure = ({ label, description, checked, onChange, badge, tooltip }) => {
     const item = createElement("label", { className: "bf-toggle" });
     const main = createElement("div", { className: "bf-toggle__main" });
     const textWrap = createElement("div", { className: "bf-toggle__text" });
     const labelRow = createElement("div", { className: "bf-toggle__label-row" });
-    const name = createElement("span", { className: "bf-toggle__label", text: toggle.label });
+    const name = createElement("span", { className: "bf-toggle__label", text: label });
     const input = createElement("input", { attrs: { type: "checkbox" }, className: "bf-switch__input" });
-    input.checked = Boolean(toggle.enabled);
+    input.checked = Boolean(checked);
     input.addEventListener("change", (event) => {
-      store.setToggle(toggle.id, event.target.checked);
+      onChange(event.target.checked);
     });
 
     const switchEl = createElement("span", { className: "bf-switch" });
@@ -211,32 +225,36 @@ export function createPanel({
     switchEl.appendChild(switchKnob);
 
     main.append(textWrap, input, switchEl);
-    if (toggle.badgeSvg) {
+
+    // Add badge if provided
+    if (badge) {
       name.classList.add("bf-toggle__label--with-badge");
-      const badge = createElement("span", {
+      const badgeEl = createElement("span", {
         className: "bf-toggle__badge",
         attrs: {
           role: "img",
-          "aria-label": toggle.badgeAlt || ""
+          "aria-label": badge.alt || ""
         }
       });
-      const badgeSvg = createSvgElement(toggle.badgeSvg);
+      const badgeSvg = createSvgElement(badge.svg);
       if (badgeSvg) {
-        badge.appendChild(badgeSvg);
+        badgeEl.appendChild(badgeSvg);
       }
-      name.appendChild(badge);
+      name.appendChild(badgeEl);
     }
 
     labelRow.appendChild(name);
-    if (toggle.tooltip) {
+
+    // Add tooltip if provided
+    if (tooltip) {
       const help = createElement("span", {
         className: "bf-tooltip-icon",
         text: "?",
         attrs: {
-          "data-tooltip": toggle.tooltip,
+          "data-tooltip": tooltip.text,
           role: "img",
           tabindex: "0",
-          "aria-label": `Info over ${toggle.label}`
+          "aria-label": `Info over ${label}`
         }
       });
       attachTooltip(help);
@@ -245,14 +263,63 @@ export function createPanel({
 
     textWrap.appendChild(labelRow);
 
-    if (toggle.description) {
-      const desc = createElement("p", { className: "bf-toggle__description", text: toggle.description });
+    if (description) {
+      const desc = createElement("p", { className: "bf-toggle__description", text: description });
       textWrap.appendChild(desc);
     }
 
     item.appendChild(main);
     return item;
   };
+
+  const renderToggle = (toggle) => {
+    return createToggleStructure({
+      label: toggle.label,
+      description: toggle.description,
+      checked: toggle.enabled,
+      onChange: (checked) => {
+        store.setToggle(toggle.id, checked);
+      },
+      badge: toggle.badgeSvg ? { svg: toggle.badgeSvg, alt: toggle.badgeAlt } : null,
+      tooltip: toggle.tooltip ? { text: toggle.tooltip } : null
+    });
+  };
+
+  const renderGenericToggle = ({ label, description, checked, onChange }) => {
+    return createToggleStructure({
+      label,
+      description,
+      checked,
+      onChange,
+      badge: null,
+      tooltip: null
+    });
+  };
+
+  // Settings View Content
+  {
+    const settingsHeader = createElement("div", { className: "bf-blocked__header" });
+    const settingsHeaderTitle = createElement("div", { className: "bf-section-title", text: "Instellingen" });
+    const settingsBackButton = createElement("button", { className: "bf-button bf-button--ghost", text: "Terug" });
+    settingsBackButton.type = "button";
+    settingsBackButton.addEventListener("click", () => setView("main"));
+    settingsHeader.append(settingsHeaderTitle, settingsBackButton);
+
+    const settingsContent = createElement("div", { className: "bf-toggle-list" });
+    const darkModeToggle = renderGenericToggle({
+      label: "Donkere modus",
+      description: "Schakel donkere modus in voor bol.com (Experimenteel).",
+      checked: darkModeEnabled,
+      onChange: (checked) => {
+        if (typeof onDarkModeChange === "function") {
+          onDarkModeChange(checked);
+        }
+      }
+    });
+    settingsContent.appendChild(darkModeToggle);
+
+    settingsView.append(settingsHeader, settingsContent);
+  }
 
   const renderToggles = (list) => {
     while (togglesList.firstChild) {
@@ -338,20 +405,35 @@ export function createPanel({
     const showMain = target === "main";
     const showSellers = target === "blocked-sellers";
     const showBrands = target === "blocked-brands";
+    const showSettings = target === "settings";
     mainView.classList.toggle("bf-panel__view-panel--active", showMain);
     blockedSellerView.classList.toggle("bf-panel__view-panel--active", showSellers);
     blockedBrandView.classList.toggle("bf-panel__view-panel--active", showBrands);
+    settingsView.classList.toggle("bf-panel__view-panel--active", showSettings);
+
+    // Notify parent about view change for persistence
+    if (typeof onViewChange === "function") {
+      onViewChange(target);
+    }
   };
+
+  // Set initial view
+  setView(currentView);
 
   blockedSellerManageButton.addEventListener("click", () => setView("blocked-sellers"));
   sellerBackButton.addEventListener("click", () => setView("main"));
   blockedBrandManageButton.addEventListener("click", () => setView("blocked-brands"));
   brandBackButton.addEventListener("click", () => setView("main"));
 
+  const setDarkMode = (enabled) => {
+    panel.classList.toggle("bf-dark-mode", enabled);
+  };
+
   return {
     element: panel,
     tooltipElement: tooltip,
     setVisible,
+    setDarkMode,
     destroy: () => {
       unsubscribe();
       if (unsubscribeBlockedSellers) {
