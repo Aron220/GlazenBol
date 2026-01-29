@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "GlazenBol",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Filter junk and dropshipper listings on bol.com with a collapsible control panel.",
   "browser_action": {
     "default_title": "GlazenBol",

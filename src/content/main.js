@@ -229,11 +229,9 @@ async function init() {
   const welcomeOverlay = createWelcomeOverlay();
   const currentVersion = getExtensionVersion();
   const updateHighlights = [
-    "Ondersteuning voor Firefox op Android.",
-    "Paneel verschijnt nu stabieler zonder flits.",
-    "Geen lege pagina meer na het openen van menu's.",
-    "Gesponsorde producten worden nu ook op productpagina's verborgen.",
-    "Vraagteken-iconen zijn netjes uitgelijnd."
+    "Donkere modus (experimenteel) voor paneel én bol.com toegevoegd (via het ⚙️-icoon in de bovenkant van het paneel).",
+    "Nieuw instellingen-scherm",
+    "Bol.com app-banner wordt nu automatisch verborgen op mobile."
   ];
   const updateOverlay = createUpdateOverlay({ version: currentVersion, highlights: updateHighlights });
 
