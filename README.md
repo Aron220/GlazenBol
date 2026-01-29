@@ -50,7 +50,6 @@ Firefox
 ## Next steps
 
 - Extend filter coverage as bol.com layout changes.
-- Add sync storage (currently uses local storage).
 - Add release automation for the Chrome Web Store and AMO.
 
 Note: `manifest.json` is MV2 for Firefox. Use `manifest.chrome.json` (MV3) when targeting Chromium-only.

@@ -36,6 +36,14 @@ html.bf-dark-mode textarea {
   border-color: #444 !important;
 }
 
+/* Floating labels often use bg-neutral-background-input; keep them dark */
+html.bf-dark-mode label[class*="bg-neutral-background-input"],
+html.bf-dark-mode span[class*="bg-neutral-background-input"],
+html.bf-dark-mode div[class*="bg-neutral-background-input"] {
+  background-color: #2d2d2d !important;
+  border-color: #444 !important;
+}
+
 /* Common Bol.com background utility classes overrides (best guess, generic) */
 html.bf-dark-mode [class*="bg-white"] {
   background-color: #1e1e1e !important;
@@ -66,6 +74,19 @@ html.bf-dark-mode img {
   opacity: 0.9;
 }
 
+/* Campaign banners (Contentstack) often include text; keep images full opacity */
+html.bf-dark-mode [data-bltgi] img {
+  opacity: 1 !important;
+}
+
+/* Ensure over-image banner text is fully readable */
+html.bf-dark-mode [data-bltgi] p,
+html.bf-dark-mode [data-bltgi] b {
+  color: #fff !important;
+  opacity: 1 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+}
+
 /* Fix: Zoomed product image container stays white in dark mode */
 html.bf-dark-mode [data-testid="content"][data-bltgi],
 html.bf-dark-mode [data-testid^="current-zoom-image-"] {
@@ -86,6 +107,12 @@ html.bf-dark-mode .text-brand-text-high {
   color: #e0e0e0 !important;
 }
 
+/* Ensure interactive link-style text stays readable */
+html.bf-dark-mode [class*="text-neutral-text-interactive-default"],
+html.bf-dark-mode [class*="text-brand-text-interactive-active"] {
+  color: #8ec5ff !important;
+}
+
 /* Fixed: Header Improvements */
 html.bf-dark-mode .bg-brand-background-high {
   background-color: #151515 !important;
@@ -103,7 +130,7 @@ html.bf-dark-mode .border-neutral-border-low {
 }
 
 /* Fix Search Input Rounding & Style */
-html.bf-dark-mode .bg-neutral-background-input {
+html.bf-dark-mode [role="search"] .bg-neutral-background-input:not(input):not(select):not(textarea) {
   background-color: #2d2d2d !important;
   border-radius: 9999px !important;
   /* Force rounding */
@@ -429,8 +456,14 @@ html.bf-dark-mode .kis-uitsmijter .color-bg {
 /* Fix: Neutral background medium-low (Discount banners, etc.) */
 html.bf-dark-mode .bg-neutral-background-medium-low,
 html.bf-dark-mode .md\:bg-neutral-background-medium-low,
-html.bf-dark-mode [class*="bg-neutral-background-medium"] {
+html.bf-dark-mode [class*="bg-neutral-background-medium"]:not([class*="bg-neutral-background-medium/"]) {
   background-color: #1e1e1e !important;
+}
+
+/* Glass/alpha medium backgrounds (e.g., brand tiles) need darker overlay */
+html.bf-dark-mode [class*="bg-neutral-background-medium/"] {
+  background-color: rgba(12, 12, 12, 0.78) !important;
+  color: #e0e0e0 !important;
 }
 
 /* Fix: Product images turning black due to mix-blend-mode: darken */
@@ -509,8 +542,7 @@ html.bf-dark-mode .sustainable-slot__tooltip svg {
 /* Tooltip popup content override */
 html.bf-dark-mode .js_tooltip_content,
 html.bf-dark-mode .tooltip,
-html.bf-dark-mode [data-test="evidence-tooltip"],
-html.bf-dark-mode [class*="bg-neutral-background-input"] {
+html.bf-dark-mode [data-test="evidence-tooltip"] {
   background-color: #2d2d2d !important;
   color: #fff !important;
   border: 1px solid #444 !important;
