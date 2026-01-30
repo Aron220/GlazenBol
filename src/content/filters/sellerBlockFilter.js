@@ -6,6 +6,7 @@ import { findSellerFromElement, isBolSeller, SELLER_LABEL_PATTERN } from "../uti
 import { ensureBlockButtonStyles, BLOCK_BUTTON_CLASS } from "../utils/blockButtonStyles.js";
 import { TIMING } from "../utils/timing.js";
 import { createDebouncedScanner } from "../utils/scheduling.js";
+import { isBolHomepage } from "../utils/pageDetection.js";
 
 function resolveButtonContainer(labelEl) {
   let container = labelEl.parentElement || labelEl;
@@ -49,6 +50,13 @@ export function createSellerBlockFilter({ store }) {
   };
 
   const scan = () => {
+    if (isBolHomepage()) {
+      document
+        .querySelectorAll(`.${BLOCK_BUTTON_CLASS}[data-bf-seller-name]`)
+        .forEach((button) => button.remove());
+      document.querySelectorAll(`[${SELLER_BLOCK_HIDDEN_ATTR}="true"]`).forEach(show);
+      return;
+    }
     ensureBlockButtonStyles();
     const hiddenListings = new Set();
     const candidates = new Set();

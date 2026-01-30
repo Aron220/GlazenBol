@@ -5,6 +5,7 @@ import { createVisibilityHelpers } from "../utils/visibilityHelpers.js";
 import { ensureBlockButtonStyles, BLOCK_BUTTON_CLASS } from "../utils/blockButtonStyles.js";
 import { TIMING } from "../utils/timing.js";
 import { createDebouncedScanner } from "../utils/scheduling.js";
+import { isBolHomepage } from "../utils/pageDetection.js";
 
 import { BRAND_LINK_SELECTOR } from "../utils/selectors.js";
 
@@ -50,6 +51,13 @@ export function createBrandBlockFilter({ store }) {
   };
 
   const scan = () => {
+    if (isBolHomepage()) {
+      document
+        .querySelectorAll(`.${BLOCK_BUTTON_CLASS}[data-bf-brand-name]`)
+        .forEach((button) => button.remove());
+      document.querySelectorAll(`[${BRAND_BLOCK_HIDDEN_ATTR}="true"]`).forEach(show);
+      return;
+    }
     ensureBlockButtonStyles();
     const hiddenListings = new Set();
 
