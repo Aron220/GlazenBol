@@ -230,8 +230,8 @@ async function init() {
   const currentVersion = getExtensionVersion();
   const updateHighlights = [
     "Donkere modus (experimenteel) voor bol.com toegevoegd! (probeer het via het ⚙️-icoon in de bovenkant van het paneel).",
-    "Nieuw instellingen-scherm",
-    "'blokkeer' button styles moderner gemaakt",
+    "Nieuw instellingen-scherm.",
+    "'blokkeer' button styles moderner gemaakt.",
     "Bol.com app-banner wordt nu automatisch verborgen op mobile.",
     "Instellingen worden onthouden tussen je apparaten (indien je ingelogd bent op hetzelfde Firefox/Chrome account)."
   ];
