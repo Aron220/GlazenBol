@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "GlazenBol",
+  "version": "0.1.2",
+  "description": "Filter junk and dropshipper listings on bol.com with a collapsible control panel.",
+  "action": {
+    "default_title": "GlazenBol",
+    "default_icon": {
+      "48": "images/icon-48.png",
+      "96": "images/icon-96.png",
+      "128": "images/icon-128.png"
+    }
+  },
+  "icons": {
+    "48": "images/icon-48.png",
+    "96": "images/icon-96.png",
+    "128": "images/icon-128.png"
+  },
+  "background": {
+    "service_worker": "src/background/index.js"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.bol.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.bol.com/*"
+      ],
+      "js": [
+        "src/content/siteFixes.js",
+        "src/content/theme.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://www.bol.com/*"
+      ],
+      "js": [
+        "src/content/loader.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/content/main.js",
+        "src/content/*.js",
+        "src/content/ui/*",
+        "src/content/state/*",
+        "src/content/filters/*",
+        "src/content/utils/*",
+        "src/content/styles/*",
+        "src/content/styles/dark-mode.css",
+        "src/shared/*",
+        "images/*"
+      ],
+      "matches": [
+        "*://www.bol.com/*"
+      ]
+    }
+  ]
+}
