@@ -489,6 +489,12 @@ html.bf-dark-mode [class*="bg-neutral-background-medium/"] {
   color: #e0e0e0 !important;
 }
 
+/* Ensure overlay chips sit above banner images when -z-10 is reset */
+html.bf-dark-mode [data-bltgi] [class*="bg-neutral-background-medium/"] {
+  position: relative;
+  z-index: 1 !important;
+}
+
 /* Fix: Product images turning black due to mix-blend-mode: darken */
 html.bf-dark-mode img,
 html.bf-dark-mode .mix-blend-darken {
