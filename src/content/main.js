@@ -229,9 +229,11 @@ async function init() {
   const welcomeOverlay = createWelcomeOverlay();
   const currentVersion = getExtensionVersion();
   const updateHighlights = [
-    "Donkere modus (experimenteel) voor paneel én bol.com toegevoegd (via het ⚙️-icoon in de bovenkant van het paneel).",
+    "Donkere modus (experimenteel) voor bol.com toegevoegd! (probeer het via het ⚙️-icoon in de bovenkant van het paneel).",
     "Nieuw instellingen-scherm",
-    "Bol.com app-banner wordt nu automatisch verborgen op mobile."
+    "'blokkeer' button styles moderner gemaakt",
+    "Bol.com app-banner wordt nu automatisch verborgen op mobile.",
+    "Instellingen worden onthouden tussen je apparaten (indien je ingelogd bent op hetzelfde Firefox/Chrome account)."
   ];
   const updateOverlay = createUpdateOverlay({ version: currentVersion, highlights: updateHighlights });
 
