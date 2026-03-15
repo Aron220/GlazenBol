@@ -28,6 +28,7 @@ import { createVerkoopDoorBolFilter } from "./filters/verkoopDoorBolFilter.js";
 import { createGoedeKeuzeFilter } from "./filters/goedeKeuzeFilter.js";
 import { createSellerBlockFilter } from "./filters/sellerBlockFilter.js";
 import { createBrandBlockFilter } from "./filters/brandBlockFilter.js";
+import { createInverseFacetFilter } from "./filters/inverseFacetFilter.js";
 import { createEmptyPageMonitor } from "./emptyPageMonitor.js";
 
 const ROOT_ID = "bol-filter-root";
@@ -268,7 +269,8 @@ async function init() {
     "filter-goede-keuze": createGoedeKeuzeFilter(),
     "filter-verkoop-door-bol": createVerkoopDoorBolFilter(),
     "filter-seller-block": createSellerBlockFilter({ store: blockedSellerStore }),
-    "filter-brand-block": createBrandBlockFilter({ store: blockedBrandStore })
+    "filter-brand-block": createBrandBlockFilter({ store: blockedBrandStore }),
+    "filter-inverse-facet": createInverseFacetFilter()
   };
 
   const emptyPageMonitor = createEmptyPageMonitor({ root: shadow });
