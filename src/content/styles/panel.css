@@ -48,11 +48,19 @@
 
 .bf-panel__header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
   padding: 12px 14px;
   background: linear-gradient(180deg, #f7fafc, #eef3f7);
   border-bottom: 1px solid #e3e8ed;
+}
+
+.bf-panel__header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .bf-panel__actions {
@@ -79,6 +87,79 @@
 
 .bf-brand__name {
   color: #0f172a;
+}
+
+.bf-panel__contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bf-panel__contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 0;
+  color: #0f172a;
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.bf-panel__contact:first-child {
+  border-top: 1px solid #dbe4ee;
+  padding-top: 8px;
+}
+
+.bf-panel__contact:hover {
+  color: #0b5cab;
+}
+
+.bf-panel__contact:focus-visible {
+  outline: 2px solid #7ccaf3;
+  outline-offset: 2px;
+}
+
+.bf-panel__contact-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #eaf2fb;
+  color: #1f2937;
+  flex-shrink: 0;
+}
+
+.bf-panel__contact-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.bf-panel__contact-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.bf-panel__contact-text {
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: #64748b;
+}
+
+.bf-panel__contact-action {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  color: #0b5cab;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .bf-button {
@@ -614,6 +695,31 @@
 
 .bf-panel.bf-dark-mode .bf-brand__name {
   color: #fff;
+}
+
+.bf-panel.bf-dark-mode .bf-panel__contact {
+  color: #f8fafc;
+}
+
+.bf-panel.bf-dark-mode .bf-panel__contact:first-child {
+  border-top-color: #334155;
+}
+
+.bf-panel.bf-dark-mode .bf-panel__contact:hover {
+  color: #93c5fd;
+}
+
+.bf-panel.bf-dark-mode .bf-panel__contact-icon {
+  background: #243244;
+  color: #f8fafc;
+}
+
+.bf-panel.bf-dark-mode .bf-panel__contact-text {
+  color: #cbd5e1;
+}
+
+.bf-panel.bf-dark-mode .bf-panel__contact-action {
+  color: #93c5fd;
 }
 
 .bf-panel.bf-dark-mode .bf-panel__footer {

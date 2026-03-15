@@ -56,6 +56,7 @@ export function createPanel({
   };
 
   const header = createElement("header", { className: "bf-panel__header" });
+  const headerMain = createElement("div", { className: "bf-panel__header-main" });
   const brand = createElement("div", { className: "bf-brand" });
   const brandLogo = createElement("img", {
     className: "bf-brand__logo",
@@ -87,8 +88,55 @@ export function createPanel({
   collapseButton.type = "button";
   collapseButton.addEventListener("click", () => onCollapse());
 
+  const contactList = createElement("div", { className: "bf-panel__contact-list" });
+
+  const contactLink = createElement("a", {
+    className: "bf-panel__contact",
+    attrs: {
+      href: "https://github.com/Aron220/GlazenBol/issues",
+      target: "_blank",
+      rel: "noopener noreferrer",
+      "aria-label": "Open GitHub issues voor functieverzoeken, wijzigingen en bugs"
+    }
+  });
+  contactLink.innerHTML = `
+    <span class="bf-panel__contact-icon" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.9.58.1.79-.25.79-.56v-2.17c-3.2.69-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.76 2.68 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.47.11-3.07 0 0 .97-.31 3.18 1.18a10.96 10.96 0 0 1 5.8 0c2.21-1.49 3.18-1.18 3.18-1.18.62 1.6.23 2.78.11 3.07.73.8 1.18 1.82 1.18 3.08 0 4.42-2.68 5.4-5.24 5.68.41.35.78 1.04.78 2.1v3.11c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path>
+      </svg>
+    </span>
+    <span class="bf-panel__contact-copy">
+      <span class="bf-panel__contact-title">Bug melden of idee delen</span>
+      <span class="bf-panel__contact-text">Via GitHub issues</span>
+    </span>
+    <span class="bf-panel__contact-action">Open issues</span>
+  `;
+
+  const emailLink = createElement("a", {
+    className: "bf-panel__contact",
+    attrs: {
+      href: "mailto:contact@example.com",
+      "aria-label": "Stuur een e-mail naar contact@example.com"
+    }
+  });
+  emailLink.innerHTML = `
+    <span class="bf-panel__contact-icon" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path>
+        <path d="m22 8-10 6L2 8"></path>
+      </svg>
+    </span>
+    <span class="bf-panel__contact-copy">
+      <span class="bf-panel__contact-title">Liever mailen?</span>
+      <span class="bf-panel__contact-text">contact@example.com</span>
+    </span>
+    <span class="bf-panel__contact-action">E-mail</span>
+  `;
+
   actions.append(settingsButton, helpButton, collapseButton);
-  header.append(brand, actions);
+  headerMain.append(brand, actions);
+  contactList.append(contactLink, emailLink);
+  header.append(headerMain, contactList);
 
   const body = createElement("div", { className: "bf-panel__body" });
   const view = createElement("div", { className: "bf-panel__view" });
