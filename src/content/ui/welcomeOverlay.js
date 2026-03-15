@@ -143,10 +143,10 @@ export function createUpdateOverlay({ version, highlights }) {
   return createInfoOverlay({
     eyebrowText: "Nieuwe update",
     titleText: `Wat is er nieuw?${titleSuffix}`,
-    introText: "GlazenBol is bijgewerkt met verbeteringen en fixes.",
+    introText: "Je kunt nu filters omdraaien met de nieuwe Behalve-modus.",
     steps: highlights,
-    noteText: "Jullie support en feedback maken dit extra leuk, dankjewel!",
-    hintText: "Vragen? Klik op de ?-knop in het paneel.",
+    noteText: "Open een filter en kies welke opties je juist wilt uitsluiten.",
+    hintText: "Later nog eens bekijken? Gebruik de ?-knop in het paneel.",
     buttonText: "Top, bedankt"
   });
 }
