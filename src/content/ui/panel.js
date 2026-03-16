@@ -115,8 +115,8 @@ export function createPanel({
   const emailLink = createElement("a", {
     className: "bf-panel__contact",
     attrs: {
-      href: "mailto:contact@example.com",
-      "aria-label": "Stuur een e-mail naar contact@example.com"
+      href: "mailto:glazenbol45@gmail.com",
+      "aria-label": "Stuur een e-mail naar glazenbol45@gmail.com"
     }
   });
   emailLink.innerHTML = `
@@ -128,7 +128,7 @@ export function createPanel({
     </span>
     <span class="bf-panel__contact-copy">
       <span class="bf-panel__contact-title">Liever mailen?</span>
-      <span class="bf-panel__contact-text">contact@example.com</span>
+      <span class="bf-panel__contact-text">glazenbol45@gmail.com</span>
     </span>
     <span class="bf-panel__contact-action">E-mail</span>
   `;
