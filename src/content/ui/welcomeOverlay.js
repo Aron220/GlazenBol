@@ -146,7 +146,6 @@ export function createUpdateOverlay({ version, highlights }) {
     introText: "Je kunt nu filters omdraaien met de nieuwe Behalve-modus.",
     steps: highlights,
     noteText: "Open een filter en kies welke opties je juist wilt uitsluiten.",
-    hintText: "Later nog eens bekijken? Gebruik de ?-knop in het paneel.",
     buttonText: "Top, bedankt"
   });
 }
